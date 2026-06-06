@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaloNutraTherapy CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #152336;
+    --navy-light: #1e3450;
+    --teal: #00c9b1;
+    --teal-dim: #00a896;
+    --gold: #c9a84c;
+    --gold-dim: #a8873a;
+    --white: #f4f6f9;
+    --muted: #8da0b3;
+    --card-bg: #152336;
+    --border: rgba(0,201,177,0.15);
+    --tier1: #00c9b1;
+    --tier2: #c9a84c;
+    --tier3: #8da0b3;
+    --status-new: #4fc3f7;
+    --status-contacted: #c9a84c;
+    --status-in-progress: #ab47bc;
+    --status-proposal: #ff7043;
+    --status-closed: #66bb6a;
+    --status-nurture: #8da0b3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* TOP HEADER */
+  .top-bar {
+    background: linear-gradient(135deg, #0a1520 0%, var(--navy-mid) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--teal), var(--gold));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: var(--navy); font-weight: 900;
+  }
+  .logo-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--white); }
+  .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+  .top-stats { display: flex; gap: 24px; }
+  .top-stat { text-align: right; }
+  .top-stat-val { font-size: 18px; font-weight: 600; color: var(--teal); }
+  .top-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* MAIN LAYOUT */
+  .layout { display: flex; height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; min-width: 200px;
+    background: #0d1b2a;
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .nav-section { padding: 0 16px; margin-bottom: 4px; }
+  .nav-section-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; padding-left: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px; border-radius: 7px;
+    cursor: pointer; transition: all 0.2s; color: var(--muted);
+    font-size: 13px; font-weight: 500;
+  }
+  .nav-item:hover { background: var(--navy-light); color: var(--white); }
+  .nav-item.active { background: rgba(0,201,177,0.12); color: var(--teal); }
+  .nav-item .badge {
+    margin-left: auto; background: var(--navy-light);
+    color: var(--muted); font-size: 10px; padding: 1px 6px; border-radius: 10px;
+  }
+  .nav-item.active .badge { background: rgba(0,201,177,0.2); color: var(--teal); }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* CONTENT VIEWS */
+  .view { display: none; flex: 1; flex-direction: column; }
+  .view.active { display: flex; }
+
+  /* DASHBOARD */
+  .dash-header { padding: 28px 28px 0; }
+  .dash-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; }
+  .dash-sub { color: var(--muted); font-size: 13px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 20px 28px; }
+  .kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.teal::before { background: var(--teal); }
+  .kpi-card.gold::before { background: var(--gold); }
+  .kpi-card.purple::before { background: #ab47bc; }
+  .kpi-card.green::before { background: #66bb6a; }
+  .kpi-val { font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .kpi-card.teal .kpi-val { color: var(--teal); }
+  .kpi-card.gold .kpi-val { color: var(--gold); }
+  .kpi-card.purple .kpi-val { color: #ce93d8; }
+  .kpi-card.green .kpi-val { color: #a5d6a7; }
+  .kpi-lbl { font-size: 12px; color: var(--muted); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  .dash-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; padding: 0 28px 28px; }
+
+  .dash-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .dash-card-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .dash-card-title { font-weight: 600; font-size: 13px; }
+  .dash-card-body { padding: 14px 18px; }
+
+  .funnel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .funnel-label { font-size: 12px; color: var(--muted); width: 90px; }
+  .funnel-bar-wrap { flex: 1; background: rgba(255,255,255,0.05); border-radius: 4px; height: 8px; }
+  .funnel-bar { height: 8px; border-radius: 4px; transition: width 0.6s; }
+  .funnel-count { font-size: 12px; color: var(--white); width: 28px; text-align: right; }
+
+  .activity-item { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .activity-text { font-size: 12px; color: var(--white); line-height: 1.4; }
+  .activity-time { font-size: 10px; color: var(--muted); }
+  .activity-name { color: var(--teal); }
+
+  /* TABLE VIEW */
+  .table-header { padding: 20px 28px 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .table-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-right: 8px; }
+  .search-box {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px;
+    color: var(--white); font-size: 13px; outline: none;
+    width: 220px;
+  }
+  .search-box::placeholder { color: var(--muted); }
+  .filter-btn {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px; cursor: pointer;
+    color: var(--muted); font-size: 12px; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: rgba(0,201,177,0.1); border-color: var(--teal); color: var(--teal); }
+  .add-btn {
+    margin-left: auto;
+    background: var(--teal); color: var(--navy);
+    border: none; border-radius: 8px; padding: 8px 16px;
+    cursor: pointer; font-size: 13px; font-weight: 600;
+  }
+  .add-btn:hover { background: var(--teal-dim); }
+
+  .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px 28px; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 10px 12px;
+    font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border); background: var(--navy); position: sticky; top: 0; z-index: 5;
+  }
+  td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  tr { cursor: pointer; }
+
+  .tier-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .tier-1 { background: rgba(0,201,177,0.15); color: var(--teal); }
+  .tier-2 { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .tier-3 { background: rgba(141,160,179,0.12); color: var(--muted); }
+
+  .status-badge {
+    display: inline-block; padding: 2px 9px; border-radius: 10px;
+    font-size: 10px; font-weight: 600; cursor: pointer;
+  }
+  .status-New { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+  .status-Contacted { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .status-In-Progress { background: rgba(171,71,188,0.15); color: #ce93d8; }
+  .status-Proposal-Sent { background: rgba(255,112,67,0.15); color: #ff8a65; }
+  .status-Closed-Won { background: rgba(102,187,106,0.15); color: #a5d6a7; }
+  .status-Nurture { background: rgba(141,160,179,0.12); color: var(--muted); }
+
+  .score-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 22px; border-radius: 6px;
+    font-size: 11px; font-weight: 700;
+  }
+  .score-high { background: rgba(0,201,177,0.15); color: var(--teal); }
+  .score-mid { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .score-low { background: rgba(141,160,179,0.1); color: var(--muted); }
+
+  .action-btn {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+    color: var(--muted); font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { background: rgba(0,201,177,0.1); color: var(--teal); border-color: var(--teal); }
+
+  /* DETAIL PANEL */
+  .detail-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 200; align-items: center; justify-content: flex-end;
+  }
+  .detail-overlay.open { display: flex; }
+  .detail-panel {
+    width: 440px; height: 100vh; background: #111f30;
+    border-left: 1px solid var(--border);
+    overflow-y: auto; padding: 24px;
+    animation: slideIn 0.25s ease;
+  }
+  @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .detail-close {
+    float: right; background: none; border: none;
+    color: var(--muted); font-size: 20px; cursor: pointer; margin-top: -4px;
+  }
+  .detail-close:hover { color: var(--white); }
+  .detail-type-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .tag-wl { background: rgba(0,201,177,0.12); color: var(--teal); }
+  .tag-inf { background: rgba(201,168,76,0.12); color: var(--gold); }
+  .tag-nad { background: rgba(171,71,188,0.12); color: #ce93d8; }
+  .detail-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .detail-meta { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+  .detail-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .detail-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
+  .detail-row { display: flex; justify-content: space-between; margin-bottom: 7px; }
+  .detail-row-label { color: var(--muted); font-size: 12px; }
+  .detail-row-val { color: var(--white); font-size: 12px; text-align: right; max-width: 200px; }
+  .detail-notes { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .detail-status-select {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; color: var(--white);
+    font-size: 13px; width: 100%; outline: none; margin-bottom: 10px; cursor: pointer;
+  }
+  .detail-note-input {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; color: var(--white);
+    font-size: 12px; width: 100%; outline: none; resize: none; height: 80px; margin-bottom: 8px;
+  }
+  .save-btn {
+    background: var(--teal); color: var(--navy);
+    border: none; border-radius: 8px; padding: 9px 20px;
+    cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;
+  }
+  .save-btn:hover { background: var(--teal-dim); }
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--teal); font-size: 12px; text-decoration: none;
+  }
+  .link-btn:hover { text-decoration: underline; }
+  .note-log { margin-top: 12px; }
+  .note-entry { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
+  .note-entry-date { font-size: 10px; color: var(--muted); }
+  .note-entry-text { font-size: 12px; color: var(--white); margin-top: 3px; }
+
+  /* EMPTY / loading */
+  .empty { padding: 60px; text-align: center; color: var(--muted); }
+
+  /* ANIMATIONS */
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* RESPONSIVE TWEAKS */
+  @media (max-width: 1000px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .dash-cols { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-mark">H</div>
+    <div>
+      <div class="logo-text">HaloNutraTherapy</div>
+      <div class="logo-sub">Sales CRM</div>
+    </div>
+  </div>
+  <div class="top-stats">
+    <div class="top-stat">
+      <div class="top-stat-val" id="stat-total">113</div>
+      <div class="top-stat-lbl">Total Contacts</div>
+    </div>
+    <div class="top-stat">
+      <div class="top-stat-val" id="stat-active">0</div>
+      <div class="top-stat-lbl">Active Outreach</div>
+    </div>
+    <div class="top-stat">
+      <div class="top-stat-val" id="stat-won">0</div>
+      <div class="top-stat-lbl">Closed Won</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="showView('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Contacts</div>
+      <div class="nav-item" onclick="showView('influencers')">
+        <span class="nav-icon">⭐</span> Influencers
+        <span class="badge" id="nav-inf-count">44</span>
+      </div>
+      <div class="nav-item" onclick="showView('whitelabel')">
+        <span class="nav-icon">🏷️</span> White Label
+        <span class="badge" id="nav-wl-count">30</span>
+      </div>
+      <div class="nav-item" onclick="showView('dealers')">
+        <span class="nav-icon">🏥</span> NAD Dealers
+        <span class="badge" id="nav-nad-count">39</span>
+      </div>
+    </div>
+    <div class="nav-section" style="margin-top: auto; padding-top: 16px;">
+      <div class="nav-section-label">Pipeline</div>
+      <div class="nav-item" onclick="showView('pipeline')">
+        <span class="nav-icon">🔄</span> All Contacts
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="dash-header">
+        <div class="dash-title">Good day — here's your pipeline.</div>
+        <div class="dash-sub">HaloNutraTherapy outreach tracker · <span id="today-date"></span></div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card teal">
+          <div class="kpi-val" id="kpi-total">113</div>
+          <div class="kpi-lbl">Total Contacts</div>
+          <div class="kpi-sub">Across all segments</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-val" id="kpi-tier1">0</div>
+          <div class="kpi-lbl">Tier 1 Contacts</div>
+          <div class="kpi-sub">Highest priority targets</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-val" id="kpi-active">0</div>
+          <div class="kpi-lbl">Active Outreach</div>
+          <div class="kpi-sub">Contacted or in progress</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-val" id="kpi-won">0</div>
+          <div class="kpi-lbl">Closed Won</div>
+          <div class="kpi-sub">Partnerships secured</div>
+        </div>
+      </div>
+      <div class="dash-cols">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Pipeline by Stage</div>
+          </div>
+          <div class="dash-card-body" id="funnel-chart"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="dash-card-title">Recent Activity</div>
+          </div>
+          <div class="dash-card-body" id="activity-log">
+            <div class="empty" style="padding: 20px; font-size: 12px;">No activity yet. Start by updating contact statuses.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFLUENCERS -->
+    <div class="view" id="view-influencers">
+      <div class="table-header">
+        <div class="table-title">Influencers</div>
+        <input class="search-box" placeholder="Search name, platform..." id="search-inf" oninput="renderInf()">
+        <button class="filter-btn active" onclick="filterInf(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterInf(this,'Tier 1')">Tier 1</button>
+        <button class="filter-btn" onclick="filterInf(this,'Tier 2')">Tier 2</button>
+        <button class="filter-btn" onclick="filterInf(this,'New')">Not Contacted</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Platform</th>
+              <th>Reach</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inf-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHITE LABEL -->
+    <div class="view" id="view-whitelabel">
+      <div class="table-header">
+        <div class="table-title">White Label</div>
+        <input class="search-box" placeholder="Search company, HQ..." id="search-wl" oninput="renderWL()">
+        <button class="filter-btn active" onclick="filterWL(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterWL(this,'Tier 1')">Tier 1</button>
+        <button class="filter-btn" onclick="filterWL(this,'Tier 2')">Tier 2</button>
+        <button class="filter-btn" onclick="filterWL(this,'New')">Not Contacted</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Company</th>
+              <th>HQ</th>
+              <th>Monthly Clients</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="wl-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NAD DEALERS -->
+    <div class="view" id="view-dealers">
+      <div class="table-header">
+        <div class="table-title">NAD Dealers</div>
+        <input class="search-box" placeholder="Search company, HQ..." id="search-nad" oninput="renderNAD()">
+        <button class="filter-btn active" onclick="filterNAD(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterNAD(this,'Tier 1')">Tier 1</button>
+        <button class="filter-btn" onclick="filterNAD(this,'Tier 2')">Tier 2</button>
+        <button class="filter-btn" onclick="filterNAD(this,'New')">Not Contacted</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Company</th>
+              <th>HQ</th>
+              <th>Locations</th>
+              <th>Monthly Clients</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="nad-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PIPELINE (all) -->
+    <div class="view" id="view-pipeline">
+      <div class="table-header">
+        <div class="table-title">All Contacts</div>
+        <input class="search-box" placeholder="Search..." id="search-all" oninput="renderAll()">
+        <button class="filter-btn active" onclick="filterAll(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterAll(this,'Influencer')">Influencers</button>
+        <button class="filter-btn" onclick="filterAll(this,'White Label')">White Label</button>
+        <button class="filter-btn" onclick="filterAll(this,'NAD Dealer')">NAD Dealers</button>
+        <button class="filter-btn" onclick="filterAll(this,'New')">New</button>
+        <button class="filter-btn" onclick="filterAll(this,'Contacted')">Contacted</button>
+        <button class="filter-btn" onclick="filterAll(this,'Closed-Won')">Won</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Segment</th>
+              <th>Name / Company</th>
+              <th>Tier / Score</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Last Note</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="all-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <button class="detail-close" onclick="closeDetailPanel()">✕</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const WL_RAW = [{"Tier":"Tier 1","Company":"Tru Niagen / Niagen Bioscience","Website":"","Contact_Email":"practitionersupport@truniagen.com","Headquarters":"Los Angeles, CA","Est_Monthly_Clients":"100,000-500,000 online consumers/mo","Device_Compatibility":"Oral NAD; Practitioner Channel; Supplement Retail","Notes":"Major NAD precursor brand; strong co-marketing/practitioner opportunity."},{"Tier":"Tier 1","Company":"Renue By Science","Website":"","Contact_Email":"support@renuebyscience.com","Headquarters":"California","Est_Monthly_Clients":"50,000-250,000 online consumers/mo","Device_Compatibility":"NAD Supplements; Longevity; E-commerce","Notes":"Extensive NAD product line; good OEM/bundle candidate."},{"Tier":"Tier 1","Company":"Elysium Health","Website":"","Contact_Email":"support@elysiumhealth.com","Headquarters":"New York, NY","Est_Monthly_Clients":"50,000-250,000 online consumers/mo","Device_Compatibility":"NAD Supplements; Biological Age Testing; Longevity","Notes":"Premium longevity brand; potential co-branded device or high-end channel."},{"Tier":"Tier 1","Company":"DoNotAge.org","Website":"","Contact_Email":"hello@donotage.org","Headquarters":"United Kingdom","Est_Monthly_Clients":"50,000-200,000 online consumers/mo","Device_Compatibility":"NAD Precursors; Longevity E-commerce","Notes":"Strong NAD/longevity customer base; international channel potential."},{"Tier":"Tier 1","Company":"Life Extension","Website":"","Contact_Email":"Contact Page","Headquarters":"Fort Lauderdale, FL","Est_Monthly_Clients":"500,000+ online consumers/mo","Device_Compatibility":"Supplements; Longevity Retail; Practitioner Market","Notes":"Large supplement brand with NAD products; good wholesale/retail channel target."},{"Tier":"Tier 1","Company":"Thorne","Website":"","Contact_Email":"support@thorne.com","Headquarters":"Summerville, SC","Est_Monthly_Clients":"250,000+ online/practitioner consumers/mo","Device_Compatibility":"Practitioner Supplements; Longevity; Health Optimization","Notes":"Strong practitioner network; device pairing could fit clinical channel."},{"Tier":"Tier 1","Company":"Designs for Health","Website":"","Contact_Email":"customerservice@designsforhealth.com","Headquarters":"Palm Coast, FL","Est_Monthly_Clients":"200,000+ practitioner consumers/mo","Device_Compatibility":"Practitioner Supplements; Functional Medicine","Notes":"High-value functional medicine channel; possible device practitioner network."},{"Tier":"Tier 1","Company":"ProHealth Longevity","Website":"","Contact_Email":"support@prohealth.com","Headquarters":"Carpinteria, CA","Est_Monthly_Clients":"50,000-200,000 online consumers/mo","Device_Compatibility":"NAD Supplements; Longevity E-commerce","Notes":"NAD-heavy product catalog; possible bundle/affiliate channel."},{"Tier":"Tier 1","Company":"Wonderfeel","Website":"","Contact_Email":"hello@getwonderfeel.com","Headquarters":"California","Est_Monthly_Clients":"20,000-100,000 online consumers/mo","Device_Compatibility":"NAD Supplements; Longevity Marketing","Notes":"Modern DTC NAD brand; good co-marketing target."},{"Tier":"Tier 1","Company":"Timeline Nutrition","Website":"","Contact_Email":"care@timeline.com","Headquarters":"Lausanne, Switzerland / US","Est_Monthly_Clients":"50,000-200,000 online consumers/mo","Device_Compatibility":"Longevity Supplements; Mitochondria; Healthy Aging","Notes":"Adjacent longevity brand; less NAD-specific but strong target market."},{"Tier":"Tier 1","Company":"Neurohacker Collective / Qualia","Website":"","Contact_Email":"support@qualialife.com","Headquarters":"Carlsbad, CA","Est_Monthly_Clients":"50,000-200,000 online consumers/mo","Device_Compatibility":"Cognitive Optimization; Longevity Supplements","Notes":"Biohacking audience; device fit if cognitive/energy positioning applies."},{"Tier":"Tier 1","Company":"Quicksilver Scientific","Website":"","Contact_Email":"support@quicksilverscientific.com","Headquarters":"Louisville, CO","Est_Monthly_Clients":"50,000-200,000 practitioner consumers/mo","Device_Compatibility":"Liposomal Supplements; Practitioner Channel; Detox/Longevity","Notes":"Strong practitioner and functional medicine channel; high synergy."},{"Tier":"Tier 2","Company":"Cymbiotika","Website":"","Contact_Email":"help@cymbiotika.com","Headquarters":"San Diego, CA","Est_Monthly_Clients":"250,000+ online consumers/mo","Device_Compatibility":"DTC Supplements; Wellness; Longevity","Notes":"Large DTC wellness audience; NAD-specific fit should be validated by current SKU list."},{"Tier":"Tier 2","Company":"Codeage","Website":"","Contact_Email":"support@codeage.com","Headquarters":"Los Angeles, CA","Est_Monthly_Clients":"100,000-300,000 online consumers/mo","Device_Compatibility":"DTC Supplements; NAD; Longevity","Notes":"Broad product catalog with NAD/NMN; good channel for bundles."},{"Tier":"Tier 2","Company":"PartiQlar","Website":"","Contact_Email":"support@partiqlar.com","Headquarters":"United States","Est_Monthly_Clients":"10,000-50,000 online consumers/mo","Device_Compatibility":"NAD Supplements; E-commerce","Notes":"NAD-focused niche brand; strong white-label fit."},{"Tier":"Tier 2","Company":"Purovitalis","Website":"","Contact_Email":"support@purovitalis.com","Headquarters":"Netherlands","Est_Monthly_Clients":"20,000-100,000 online consumers/mo","Device_Compatibility":"NAD Precursors; Longevity E-commerce","Notes":"International NAD/longevity brand; potential EU channel partner."},{"Tier":"Tier 2","Company":"MoleQlar / Biohacker Center Store","Website":"","Contact_Email":"support@moleqlar.com","Headquarters":"Germany","Est_Monthly_Clients":"10,000-75,000 online consumers/mo","Device_Compatibility":"Biohacking Supplements; Longevity Retail","Notes":"EU biohacking retail audience; strong for international exposure."},{"Tier":"Tier 2","Company":"Omre","Website":"","Contact_Email":"hello@omre.co","Headquarters":"United Kingdom","Est_Monthly_Clients":"10,000-50,000 online consumers/mo","Device_Compatibility":"NAD Precursors; Longevity E-commerce","Notes":"Small but targeted NAD supplement audience."},{"Tier":"Tier 2","Company":"MAAC10 Formulas","Website":"","Contact_Email":"support@maac10.com","Headquarters":"United States","Est_Monthly_Clients":"10,000-50,000 online consumers/mo","Device_Compatibility":"NAD Supplements; Healthy Aging","Notes":"Niche longevity supplement brand; possible bundle target."},{"Tier":"Tier 2","Company":"GenF20 Plus / Leading Edge Health","Website":"","Contact_Email":"support@leadingedgehealth.com","Headquarters":"United States","Est_Monthly_Clients":"25,000-100,000 online consumers/mo","Device_Compatibility":"Healthy Aging Supplements; DTC","Notes":"Not strictly NAD; include as adjacent anti-aging consumer channel."},{"Tier":"Tier 2","Company":"Vitruvin","Website":"","Contact_Email":"support@vitruvin.com","Headquarters":"United States","Est_Monthly_Clients":"5,000-30,000 online consumers/mo","Device_Compatibility":"Longevity Supplements; NAD Audience","Notes":"Smaller niche target; verify active product line."},{"Tier":"Tier 2","Company":"Double Wood Supplements","Website":"","Contact_Email":"support@doublewoodsupplements.com","Headquarters":"Philadelphia, PA","Est_Monthly_Clients":"100,000+ online consumers/mo","Device_Compatibility":"Supplements; NAD Precursors; Marketplace Sales","Notes":"Large supplement catalog and Amazon presence; possible white-label/retail partner."},{"Tier":"Tier 2","Company":"Alive By Science / Renue legacy customers","Website":"","Contact_Email":"support@renuebyscience.com","Headquarters":"California","Est_Monthly_Clients":"Included in Renue estimate","Device_Compatibility":"NAD Community; Supplement Buyers","Notes":"Legacy Alive By Science audience now tied to Renue; keep under Renue unless segmented."},{"Tier":"Tier 2","Company":"NMN.com / Longevity content network","Website":"","Contact_Email":"Contact Page","Headquarters":"United States","Est_Monthly_Clients":"25,000-150,000 readers/mo","Device_Compatibility":"NAD Education; Affiliate Channel","Notes":"Content/affiliate prospect rather than direct dealer; useful for lead generation."},{"Tier":"Tier 3","Company":"BulkSupplements.com","Website":"","Contact_Email":"cs@bulksupplements.com","Headquarters":"Henderson, NV","Est_Monthly_Clients":"250,000+ online consumers/mo","Device_Compatibility":"Supplement Manufacturing; Bulk Ingredients","Notes":"Could be useful for volume or private-label channel, less premium."},{"Tier":"Tier 3","Company":"Nootropics Depot","Website":"","Contact_Email":"support@nootropicsdepot.com","Headquarters":"Tempe, AZ","Est_Monthly_Clients":"100,000+ online consumers/mo","Device_Compatibility":"Nootropics; Longevity Supplements; E-commerce","Notes":"Biohacking/nootropic audience; possible product-bundle channel."},{"Tier":"Tier 3","Company":"Pure Encapsulations","Website":"","Contact_Email":"Contact Page","Headquarters":"Sudbury, MA","Est_Monthly_Clients":"250,000+ practitioner consumers/mo","Device_Compatibility":"Practitioner Supplements; Functional Medicine","Notes":"Strong practitioner channel but less NAD-specific; include as secondary."},{"Tier":"Tier 3","Company":"Seeking Health","Website":"","Contact_Email":"support@seekinghealth.com","Headquarters":"Bellingham, WA","Est_Monthly_Clients":"50,000-150,000 online consumers/mo","Device_Compatibility":"Functional Supplements; Mitochondria; Practitioner Channel","Notes":"Adjacent functional medicine audience; not strictly NAD."},{"Tier":"Tier 3","Company":"HUM Nutrition","Website":"","Contact_Email":"hello@humnutrition.com","Headquarters":"Los Angeles, CA","Est_Monthly_Clients":"250,000+ consumers/mo","Device_Compatibility":"Consumer Supplements; Retail","Notes":"Large consumer base but weaker NAD specificity."},{"Tier":"Tier 3","Company":"Ritual","Website":"","Contact_Email":"hello@ritual.com","Headquarters":"Los Angeles, CA","Est_Monthly_Clients":"500,000+ consumers/mo","Device_Compatibility":"Consumer Supplements; DTC; Retail","Notes":"Large audience, but not NAD-focused; lower priority unless device is consumer-ready."}];
+
+const INF_RAW = [{"Priority_Score":"8.8","Name":"Dave Asprey","Category":"Influencer/Founder","Primary_Platform":"Podcast, IG, Conference","Website":"https://daveasprey.com","Contact_Booking":"https://daveasprey.com/contact/","Instagram":"https://www.instagram.com/dave.asprey/","YouTube":"https://www.youtube.com/@DaveAspreyBPR","Podcast":"The Human Upgrade","Reach_Tier":"Macro","NAD_Alignment":10.0,"Device_Fit":10.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Biohackers, longevity consumers, founders","Best_Partnership":"Brand ambassador, podcast sponsor, conference intro","Est_Sponsorship_Cost":"$25k-$100k+","Practical_Notes":"Created/defined biohacking category; extremely high visibility but expensive/selective.","Source_URL":"https://daveasprey.com"},{"Priority_Score":"8.8","Name":"Gary Brecka","Category":"Influencer/Founder","Primary_Platform":"Podcast, IG, YouTube","Website":"https://www.theultimatehuman.com","Contact_Booking":"https://www.theultimatehuman.com/contact","Instagram":"https://www.instagram.com/garybrecka/","YouTube":"https://www.youtube.com/@ultimatehumanpodcast","Podcast":"The Ultimate Human","Reach_Tier":"Macro","NAD_Alignment":10.0,"Device_Fit":10.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Mainstream wellness, anti-aging, performance","Best_Partnership":"Podcast sponsor, protocol placement, affiliate offer","Est_Sponsorship_Cost":"$50k-$150k+","Practical_Notes":"Strong mainstream reach; known for protocols and optimization products.","Source_URL":"https://www.theultimatehuman.com"},{"Priority_Score":"9","Name":"Ben Greenfield","Category":"Influencer/Founder","Primary_Platform":"Podcast, IG, YouTube","Website":"https://bengreenfieldfitness.com","Contact_Booking":"https://bengreenfieldfitness.com/contact/","Instagram":"https://www.instagram.com/bengreenfieldfitness/","YouTube":"https://www.youtube.com/@BenGreenfieldLife","Podcast":"Ben Greenfield Life","Reach_Tier":"Macro","NAD_Alignment":10.0,"Device_Fit":10.0,"Access_Score":5.0,"Conference_Speaker":"Y","Audience_Type":"Performance athletes, biohackers, longevity consumers","Best_Partnership":"Product ambassador, co-branded formula, podcast integration","Est_Sponsorship_Cost":"$25k-$75k+","Practical_Notes":"Deep personal use of NAD/peptides; actively promotes HaloTherapy devices. Strong fit.","Source_URL":"https://bengreenfieldfitness.com"},{"Priority_Score":"7.4","Name":"Dr. Peter Attia","Category":"Physician/Author","Primary_Platform":"Podcast, Newsletter","Website":"https://peterattiamd.com","Contact_Booking":"https://peterattiamd.com/contact/","Instagram":"https://www.instagram.com/peterattiamd/","YouTube":"https://www.youtube.com/@PeterAttiaMD","Podcast":"The Drive","Reach_Tier":"Macro","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":2.0,"Conference_Speaker":"Y","Audience_Type":"Physicians, high-income longevity consumers","Best_Partnership":"Long-form podcast feature, clinical protocol mention","Est_Sponsorship_Cost":"$50k-$200k+","Practical_Notes":"Extremely selective; unlikely unless clinical data supports it. Lower access score.","Source_URL":"https://peterattiamd.com"},{"Priority_Score":"7.6","Name":"Dr. Mark Hyman","Category":"Physician/Author","Primary_Platform":"Podcast, IG, YouTube","Website":"https://drhyman.com","Contact_Booking":"https://drhyman.com/contact/","Instagram":"https://www.instagram.com/drmarkhyman/","YouTube":"https://www.youtube.com/@drmarkhyman","Podcast":"The Doctor's Farmacy","Reach_Tier":"Macro","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":3.0,"Conference_Speaker":"Y","Audience_Type":"Functional medicine consumers, mainstream wellness","Best_Partnership":"Podcast mention, clinical recommendation, practitioner network","Est_Sponsorship_Cost":"$50k-$150k+","Practical_Notes":"Large functional medicine audience; reach him through practitioner network.","Source_URL":"https://drhyman.com"},{"Priority_Score":"6.8","Name":"Andrew Huberman","Category":"Scientist/Influencer","Primary_Platform":"Podcast, YouTube, IG","Website":"https://www.hubermanlab.com","Contact_Booking":"https://www.hubermanlab.com/contact","Instagram":"https://www.instagram.com/hubermanlab/","YouTube":"https://www.youtube.com/@hubermanlab","Podcast":"Huberman Lab","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":2.0,"Conference_Speaker":"Y","Audience_Type":"Science-minded wellness, mainstream","Best_Partnership":"Organic mention or data-backed sponsorship","Est_Sponsorship_Cost":"Not disclosed / very selective","Practical_Notes":"Requires clinical evidence; extremely selective partnerships. Low access.","Source_URL":"https://www.hubermanlab.com"},{"Priority_Score":"9.1","Name":"Kayla Barnes","Category":"Biohacker/Creator","Primary_Platform":"IG, Podcast","Website":"https://kaylabarnes.com","Contact_Booking":"https://kaylabarnes.com/contact","Instagram":"https://www.instagram.com/kaylabarnes_/","YouTube":"","Podcast":"Brain Biohacking","Reach_Tier":"Mid-tier","NAD_Alignment":10.0,"Device_Fit":10.0,"Access_Score":8.0,"Conference_Speaker":"Y","Audience_Type":"Female biohackers, longevity, optimization","Best_Partnership":"Co-branded formula, ambassador, paid content","Est_Sponsorship_Cost":"$2k-$10k","Practical_Notes":"High fit; female biohacker audience. Strong access.","Source_URL":"https://kaylabarnes.com"},{"Priority_Score":"8.6","Name":"Dr. Molly Maloof","Category":"Physician/Biohacker","Primary_Platform":"Podcast, IG, Speaking","Website":"https://www.drmaloof.com","Contact_Booking":"https://www.drmaloof.com/contact","Instagram":"https://www.instagram.com/drmaloof/","YouTube":"","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Biohackers, physicians, longevity consumers","Best_Partnership":"Protocol integration, paid content, practitioner channel","Est_Sponsorship_Cost":"$3k-$15k","Practical_Notes":"Physician credibility + biohacking audience; strong fit.","Source_URL":"https://www.drmaloof.com"},{"Priority_Score":"8.9","Name":"Dr. Darshan Shah","Category":"Physician/Biohacker","Primary_Platform":"Podcast, IG, YouTube","Website":"https://www.nextlevelhealth.com","Contact_Booking":"https://www.nextlevelhealth.com/contact","Instagram":"https://www.instagram.com/dr.darshan.shah/","YouTube":"","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Biohackers, longevity consumers, physicians","Best_Partnership":"Product placement, protocol recommendation","Est_Sponsorship_Cost":"$2k-$10k","Practical_Notes":"Next Health founder; highly aligned with NAD and device use cases.","Source_URL":"https://www.nextlevelhealth.com"},{"Priority_Score":"9.3","Name":"Nathalie Niddam","Category":"Biohacker/Educator","Primary_Platform":"Podcast, IG","Website":"https://nathaliemcon.com","Contact_Booking":"https://nathaliemcon.com/contact","Instagram":"https://www.instagram.com/nathalieniddam/","YouTube":"","Podcast":"Biohacking Superhuman Performance","Reach_Tier":"Mid-tier","NAD_Alignment":10.0,"Device_Fit":10.0,"Access_Score":9.0,"Conference_Speaker":"Y","Audience_Type":"Peptide users, longevity, biohackers","Best_Partnership":"Co-branded peptide formula, ambassador, podcast feature","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Top-rated peptide educator globally; best access and alignment in the list.","Source_URL":"https://nathaliemcon.com"},{"Priority_Score":"8.8","Name":"Siim Land","Category":"Biohacker/Author","Primary_Platform":"YouTube, Podcast, IG","Website":"https://siimland.com","Contact_Booking":"https://siimland.com/contact","Instagram":"https://www.instagram.com/siimland/","YouTube":"https://www.youtube.com/@SiimLand","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":10.0,"Device_Fit":9.0,"Access_Score":8.0,"Conference_Speaker":"Y","Audience_Type":"Longevity consumers, biohackers, researchers","Best_Partnership":"Product review, co-branded formula, affiliate","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Very accessible; strong longevity/NAD content creator.","Source_URL":"https://siimland.com"},{"Priority_Score":"7.2","Name":"Dr. Casey Means","Category":"Physician/Author","Primary_Platform":"Podcast, IG, Newsletter","Website":"https://www.caseymeans.com","Contact_Booking":"","Instagram":"https://www.instagram.com/drcaseyskitchen/","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":6.0,"Access_Score":3.0,"Conference_Speaker":"Y","Audience_Type":"Metabolic health, mainstream wellness","Best_Partnership":"Metabolic angle for product positioning","Est_Sponsorship_Cost":"Not disclosed","Practical_Notes":"Good Will Hunting Machine (book) elevated her reach but she's very selective.","Source_URL":"https://www.caseymeans.com"},{"Priority_Score":"8.8","Name":"Dr. Amy Killen","Category":"Physician/Biohacker","Primary_Platform":"Podcast, IG, Conference","Website":"https://drakilen.com","Contact_Booking":"https://drakilen.com/contact","Instagram":"https://www.instagram.com/drakillen/","YouTube":"","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Longevity, biohackers, physicians","Best_Partnership":"Protocol integration, practitioner ambassador","Est_Sponsorship_Cost":"$2k-$10k","Practical_Notes":"Longevity physician with large conference presence; strong access.","Source_URL":"https://drakilen.com"},{"Priority_Score":"7.5","Name":"Dr. Tyna Moore","Category":"Physician/Biohacker","Primary_Platform":"Podcast, IG","Website":"https://drtyna.com","Contact_Booking":"https://drtyna.com/contact","Instagram":"https://www.instagram.com/drtyna/","YouTube":"","Podcast":"The Dr. Tyna Show","Reach_Tier":"Mid-tier","NAD_Alignment":8.0,"Device_Fit":8.0,"Access_Score":7.0,"Conference_Speaker":"N","Audience_Type":"Women's health, metabolic, recovery","Best_Partnership":"Recovery formula ambassador","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Recovery and peptide audience; fits HaloRecovery formula well.","Source_URL":"https://drtyna.com"},{"Priority_Score":"9.1","Name":"Tim Gray","Category":"Biohacker/Founder","Primary_Platform":"Conference, IG, Podcast","Website":"https://timgray.co.uk","Contact_Booking":"https://timgray.co.uk/contact","Instagram":"https://www.instagram.com/timbiohacker/","YouTube":"","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":10.0,"Access_Score":9.0,"Conference_Speaker":"Y","Audience_Type":"European biohackers, longevity, optimization","Best_Partnership":"European market ambassador, conference feature","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Health Optimisation Summit founder; strong European channel opportunity.","Source_URL":"https://timgray.co.uk"},{"Priority_Score":"8.6","Name":"Anthony DiClementi","Category":"Biohacker/Author","Primary_Platform":"Podcast, IG, YouTube","Website":"https://anthonydiclementi.com","Contact_Booking":"https://anthonydiclementi.com/contact","Instagram":"https://www.instagram.com/anthonydiclementi/","YouTube":"","Podcast":"The Biohacking Secrets Show","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":8.0,"Conference_Speaker":"Y","Audience_Type":"Performance biohackers, entrepreneurs","Best_Partnership":"Affiliate, product review, podcast integration","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Accessible biohacker with good device fit.","Source_URL":"https://anthonydiclementi.com"},{"Priority_Score":"7.6","Name":"JJ Virgin","Category":"Wellness Expert/Author","Primary_Platform":"Podcast, IG, TV","Website":"https://jjvirgin.com","Contact_Booking":"https://jjvirgin.com/contact","Instagram":"https://www.instagram.com/jjvirginofficial/","YouTube":"","Podcast":"Well Beyond 40","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":5.0,"Conference_Speaker":"Y","Audience_Type":"Women 40+, wellness, weight management","Best_Partnership":"HaloRelax or recovery formula placement","Est_Sponsorship_Cost":"$5k-$25k","Practical_Notes":"Large female audience for recovery/relaxation products.","Source_URL":"https://jjvirgin.com"},{"Priority_Score":"7.9","Name":"Dr. Sandra Kaufmann","Category":"Physician/Author","Primary_Platform":"IG, Speaking, Book","Website":"https://kaufmannprotocol.com","Contact_Booking":"https://kaufmannprotocol.com/contact","Instagram":"https://www.instagram.com/kaufmannprotocol/","YouTube":"","Podcast":"","Reach_Tier":"Micro-mid","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":8.0,"Conference_Speaker":"Y","Audience_Type":"Longevity researchers, biohackers, physicians","Best_Partnership":"Protocol mention, longevity physician network","Est_Sponsorship_Cost":"$500-$3k","Practical_Notes":"Longevity protocol author with high content quality.","Source_URL":"https://kaufmannprotocol.com"},{"Priority_Score":"8","Name":"Dr. Adeel Khan","Category":"Physician/Biohacker","Primary_Platform":"IG, Podcast, Conference","Website":"https://drkhan.ca","Contact_Booking":"https://drkhan.ca/contact","Instagram":"https://www.instagram.com/dradeel_khan/","YouTube":"","Podcast":"","Reach_Tier":"Micro-mid","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":8.0,"Conference_Speaker":"Y","Audience_Type":"Biohackers, physicians, longevity","Best_Partnership":"Peptide/NAD protocol ambassador","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Peptide-focused physician; strong device fit.","Source_URL":"https://drkhan.ca"},{"Priority_Score":"8.2","Name":"Dr. Elizabeth Yurth","Category":"Physician/Biohacker","Primary_Platform":"Podcast, Conference, IG","Website":"https://boulderlongevity.com","Contact_Booking":"https://boulderlongevity.com/contact","Instagram":"","YouTube":"","Podcast":"","Reach_Tier":"Micro-mid","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Physicians, longevity consumers","Best_Partnership":"Clinical protocol, practitioner network","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Boulder Longevity Institute; NAD clinical protocols strongly align.","Source_URL":"https://boulderlongevity.com"},{"Priority_Score":"7.9","Name":"Lucas Aoun","Category":"Biohacker/Educator","Primary_Platform":"YouTube, IG","Website":"https://ergogenic.health","Contact_Booking":"https://ergogenic.health/contact","Instagram":"https://www.instagram.com/lucas_aoun/","YouTube":"https://www.youtube.com/@LucasAoun","Podcast":"","Reach_Tier":"Micro-mid","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":8.0,"Conference_Speaker":"N","Audience_Type":"Performance biohackers, athletes","Best_Partnership":"Product review, affiliate, recovery formula","Est_Sponsorship_Cost":"$500-$3k","Practical_Notes":"Performance/NAD content creator; high access.","Source_URL":"https://ergogenic.health"},{"Priority_Score":"7.9","Name":"Melanie Avalon","Category":"Biohacker/Author","Primary_Platform":"Podcast, IG","Website":"https://melanieavalon.com","Contact_Booking":"https://melanieavalon.com/contact","Instagram":"https://www.instagram.com/melanieavalon/","YouTube":"","Podcast":"The Melanie Avalon Biohacking Podcast","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Female biohackers, fasting, longevity","Best_Partnership":"Affiliate, podcast feature, female audience angle","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Large female biohacker audience; podcast reach strong.","Source_URL":"https://melanieavalon.com"},{"Priority_Score":"7.8","Name":"Zora Benhamou","Category":"Biohacker/Author","Primary_Platform":"IG, Podcast, Book","Website":"https://hackyourmenopause.com","Contact_Booking":"https://hackyourmenopause.com/contact","Instagram":"https://www.instagram.com/hackyourmenopause/","YouTube":"","Podcast":"","Reach_Tier":"Micro","NAD_Alignment":8.0,"Device_Fit":8.0,"Access_Score":9.0,"Conference_Speaker":"N","Audience_Type":"Women 45+, menopause, longevity","Best_Partnership":"HaloRelax/recovery formula ambassador","Est_Sponsorship_Cost":"$500-$2k","Practical_Notes":"Very accessible; niche but highly targeted female 45+ audience.","Source_URL":"https://hackyourmenopause.com"},{"Priority_Score":"7.9","Name":"Shawn Wells","Category":"Biohacker/Formulator","Primary_Platform":"Podcast, IG, Speaking","Website":"https://shawnwells.com","Contact_Booking":"https://shawnwells.com/contact","Instagram":"https://www.instagram.com/shawnwells/","YouTube":"","Podcast":"","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Supplement formulators, biohackers, performance","Best_Partnership":"Co-formulation, ambassador, ingredient validation","Est_Sponsorship_Cost":"$2k-$10k","Practical_Notes":"Supplement industry formulator with biohacking cred.","Source_URL":"https://shawnwells.com"},{"Priority_Score":"7.7","Name":"Sachin Patel","Category":"Physician/Educator","Primary_Platform":"Podcast, IG, Speaking","Website":"https://sachinpatel.ca","Contact_Booking":"https://sachinpatel.ca/contact","Instagram":"https://www.instagram.com/thesachinpatel/","YouTube":"","Podcast":"The Living Proof Podcast","Reach_Tier":"Mid-tier","NAD_Alignment":8.0,"Device_Fit":8.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Practitioners, functional medicine, patients","Best_Partnership":"Practitioner channel, protocol placement","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Functional medicine educator; practitioner network access.","Source_URL":"https://sachinpatel.ca"},{"Priority_Score":"7.6","Name":"Dr. Will Cole","Category":"Physician/Author","Primary_Platform":"IG, Podcast, Book","Website":"https://drwillcole.com","Contact_Booking":"https://drwillcole.com/contact","Instagram":"https://www.instagram.com/drwillcole/","YouTube":"","Podcast":"The Art of Being Well","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Functional medicine, Goop audience, women","Best_Partnership":"Product placement in functional med content","Est_Sponsorship_Cost":"$5k-$20k","Practical_Notes":"Goop-aligned functional medicine; higher access barrier.","Source_URL":"https://drwillcole.com"},{"Priority_Score":"6.8","Name":"Dr. David Sinclair","Category":"Scientist/Author","Primary_Platform":"Podcast, Book, YouTube","Website":"https://sinclair.hms.harvard.edu","Contact_Booking":"","Instagram":"https://www.instagram.com/davidsinclairphd/","YouTube":"https://www.youtube.com/@davidsinclairpodcast","Podcast":"Lifespan","Reach_Tier":"Macro","NAD_Alignment":10.0,"Device_Fit":7.0,"Access_Score":1.0,"Conference_Speaker":"Y","Audience_Type":"Scientists, longevity, mainstream","Best_Partnership":"Organic mention only","Est_Sponsorship_Cost":"Not available","Practical_Notes":"Extremely low access; organic engagement only. Not realistic sponsor target.","Source_URL":"https://sinclair.hms.harvard.edu"},{"Priority_Score":"7.7","Name":"Dr. Kara Fitzgerald","Category":"Physician/Researcher","Primary_Platform":"Podcast, IG, Book","Website":"https://drkarafitzgerald.com","Contact_Booking":"https://drkarafitzgerald.com/contact","Instagram":"https://www.instagram.com/drkarafitzgerald/","YouTube":"","Podcast":"New Frontiers in Functional Medicine","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":8.0,"Access_Score":6.0,"Conference_Speaker":"Y","Audience_Type":"Practitioners, functional medicine, longevity","Best_Partnership":"Practitioner ambassador, clinical protocol","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Epigenetic aging researcher; strong credential for longevity positioning.","Source_URL":"https://drkarafitzgerald.com"},{"Priority_Score":"6.7","Name":"Dr. Sara Gottfried","Category":"Physician/Author","Primary_Platform":"Podcast, IG, Book","Website":"https://saragottfriedmd.com","Contact_Booking":"https://saragottfriedmd.com/contact","Instagram":"https://www.instagram.com/saragottfriedmd/","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":6.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Women's health, hormones, longevity","Best_Partnership":"HaloRelax or hormonal balance angle","Est_Sponsorship_Cost":"$5k-$25k","Practical_Notes":"Female longevity; moderate NAD alignment.","Source_URL":"https://saragottfriedmd.com"},{"Priority_Score":"6.4","Name":"Dr. Dale Bredesen","Category":"Physician/Researcher","Primary_Platform":"Book, Podcast, Speaking","Website":"https://apollohealthco.com","Contact_Booking":"","Instagram":"","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":6.0,"Access_Score":2.0,"Conference_Speaker":"Y","Audience_Type":"Alzheimer's/cognitive decline patients, physicians","Best_Partnership":"Cognitive health angle only; very selective","Est_Sponsorship_Cost":"Not disclosed","Practical_Notes":"Very low access; extremely specialized audience.","Source_URL":"https://apollohealthco.com"},{"Priority_Score":"6.7","Name":"Dr. Steven Gundry","Category":"Physician/Author","Primary_Platform":"Podcast, Book, TV","Website":"https://drgundry.com","Contact_Booking":"https://drgundry.com/contact","Instagram":"https://www.instagram.com/drstevengundry/","YouTube":"","Podcast":"The Dr. Gundry Podcast","Reach_Tier":"Macro","NAD_Alignment":6.0,"Device_Fit":6.0,"Access_Score":3.0,"Conference_Speaker":"Y","Audience_Type":"Mainstream wellness, gut health consumers","Best_Partnership":"Product mention only if gut/longevity angle found","Est_Sponsorship_Cost":"$25k+","Practical_Notes":"Less NAD-specific but large mainstream audience.","Source_URL":"https://drgundry.com"},{"Priority_Score":"6.8","Name":"Dr. Daniel Pompa","Category":"Physician/Speaker","Primary_Platform":"Podcast, Speaking, IG","Website":"https://drpompa.com","Contact_Booking":"https://drpompa.com/contact","Instagram":"https://www.instagram.com/drpompa/","YouTube":"","Podcast":"Cellular Healing TV","Reach_Tier":"Mid-tier","NAD_Alignment":8.0,"Device_Fit":8.0,"Access_Score":6.0,"Conference_Speaker":"Y","Audience_Type":"Cellular health, detox, longevity","Best_Partnership":"Cellular health/detox angle for HNT","Est_Sponsorship_Cost":"$2k-$10k","Practical_Notes":"Cellular healing angle aligns well with HNT formula.","Source_URL":"https://drpompa.com"},{"Priority_Score":"6.9","Name":"Max Lugavere","Category":"Science Communicator","Primary_Platform":"Podcast, Book, YouTube","Website":"https://maxlugavere.com","Contact_Booking":"https://maxlugavere.com/contact","Instagram":"https://www.instagram.com/maxlugavere/","YouTube":"https://www.youtube.com/@MaxLugavere","Podcast":"Genius Life","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Brain health, mainstream wellness","Best_Partnership":"Cognitive energy/NAD angle","Est_Sponsorship_Cost":"$10k-$30k","Practical_Notes":"Large mainstream audience; NAD-cognitive angle needed.","Source_URL":"https://maxlugavere.com"},{"Priority_Score":"6.6","Name":"Dr. Mindy Pelz","Category":"Physician/Author","Primary_Platform":"YouTube, Podcast, Book","Website":"https://drmindypelz.com","Contact_Booking":"https://drmindypelz.com/contact","Instagram":"https://www.instagram.com/drmindypelz/","YouTube":"","Podcast":"The Resetter Podcast","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Women's health, fasting, hormones","Best_Partnership":"Female audience recovery/relaxation","Est_Sponsorship_Cost":"$5k-$20k","Practical_Notes":"Large female fasting audience; HaloRelax fit.","Source_URL":"https://drmindypelz.com"},{"Priority_Score":"6.4","Name":"Mark Sisson","Category":"Biohacker/Author","Primary_Platform":"Blog, Podcast, IG","Website":"https://marksdailyapple.com","Contact_Booking":"https://marksdailyapple.com/contact/","Instagram":"https://www.instagram.com/marksissonprimal/","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":5.0,"Conference_Speaker":"Y","Audience_Type":"Primal/paleo, fitness, longevity","Best_Partnership":"Performance recovery angle","Est_Sponsorship_Cost":"$5k-$20k","Practical_Notes":"Primal Blueprint founder; aging biohacker audience.","Source_URL":"https://marksdailyapple.com"},{"Priority_Score":"6.5","Name":"Robb Wolf","Category":"Author/Biohacker","Primary_Platform":"Podcast, IG, Book","Website":"https://robbwolf.com","Contact_Booking":"https://robbwolf.com/contact/","Instagram":"https://www.instagram.com/dasrobbwolf/","YouTube":"","Podcast":"The Paleo Solution","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":5.0,"Conference_Speaker":"Y","Audience_Type":"Paleo, performance, longevity","Best_Partnership":"Recovery formula integration","Est_Sponsorship_Cost":"$5k-$15k","Practical_Notes":"Paleo movement pioneer; decent reach and recovery fit.","Source_URL":"https://robbwolf.com"},{"Priority_Score":"7","Name":"Chris Masterjohn","Category":"Researcher/Educator","Primary_Platform":"Newsletter, Podcast, IG","Website":"https://chrismasterjohnphd.com","Contact_Booking":"https://chrismasterjohnphd.com/contact","Instagram":"https://www.instagram.com/chrismasterjohnphd/","YouTube":"","Podcast":"","Reach_Tier":"Micro-mid","NAD_Alignment":9.0,"Device_Fit":7.0,"Access_Score":7.0,"Conference_Speaker":"N","Audience_Type":"Researchers, science-first biohackers","Best_Partnership":"Deep scientific review/content","Est_Sponsorship_Cost":"$500-$3k","Practical_Notes":"Science-first audience; useful for bioavailability data credibility.","Source_URL":"https://chrismasterjohnphd.com"},{"Priority_Score":"6.7","Name":"Ben Azadi","Category":"Biohacker/Author","Primary_Platform":"Podcast, YouTube, IG","Website":"https://benazadi.com","Contact_Booking":"https://benazadi.com/contact","Instagram":"https://www.instagram.com/thebenazadi/","YouTube":"","Podcast":"Metabolic Freedom","Reach_Tier":"Mid-tier","NAD_Alignment":8.0,"Device_Fit":7.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Metabolic health, keto, biohackers","Best_Partnership":"Affiliate, podcast integration","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Accessible ketogenic/metabolic biohacker.","Source_URL":"https://benazadi.com"},{"Priority_Score":"6.6","Name":"Thomas DeLauer","Category":"Fitness/Biohacker","Primary_Platform":"YouTube, IG","Website":"https://thomasdelauer.com","Contact_Booking":"https://thomasdelauer.com/contact","Instagram":"https://www.instagram.com/thomasdelauer/","YouTube":"https://www.youtube.com/@ThomasDeLauerOfficial","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":5.0,"Conference_Speaker":"Y","Audience_Type":"Fitness, keto, performance","Best_Partnership":"Recovery formula, HaloRecovery affiliate","Est_Sponsorship_Cost":"$5k-$25k","Practical_Notes":"Large YouTube fitness audience; recovery product fit.","Source_URL":"https://thomasdelauer.com"},{"Priority_Score":"7.7","Name":"Ari Whitten","Category":"Health Educator","Primary_Platform":"Podcast, Course, IG","Website":"https://theenergyblueprint.com","Contact_Booking":"https://theenergyblueprint.com/contact","Instagram":"https://www.instagram.com/ari.whitten/","YouTube":"","Podcast":"The Energy Blueprint","Reach_Tier":"Mid-tier","NAD_Alignment":9.0,"Device_Fit":9.0,"Access_Score":7.0,"Conference_Speaker":"Y","Audience_Type":"Energy optimization, fatigue recovery","Best_Partnership":"NAD+energy formula ambassador, podcast feature","Est_Sponsorship_Cost":"$1k-$5k","Practical_Notes":"Energy/fatigue niche; great HaloNAD+ fit.","Source_URL":"https://theenergyblueprint.com"},{"Priority_Score":"6.9","Name":"Dr. Gabrielle Lyon","Category":"Physician/Author","Primary_Platform":"Podcast, IG, Book","Website":"https://drgabriellelyon.com","Contact_Booking":"https://drgabriellelyon.com/contact","Instagram":"https://www.instagram.com/drgabriellelyon/","YouTube":"","Podcast":"The Dr. Gabrielle Lyon Show","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Muscle-centric health, longevity, women","Best_Partnership":"HaloRecovery/muscle recovery angle","Est_Sponsorship_Cost":"$10k-$30k","Practical_Notes":"Muscle-first medicine; recovery formula fit.","Source_URL":"https://drgabriellelyon.com"},{"Priority_Score":"6.7","Name":"Dr. Rhonda Patrick","Category":"Scientist/Educator","Primary_Platform":"Podcast, YouTube, IG","Website":"https://www.foundmyfitness.com","Contact_Booking":"https://www.foundmyfitness.com/contact","Instagram":"https://www.instagram.com/drrhondapatrick/","YouTube":"https://www.youtube.com/@FoundMyFitness","Podcast":"Found My Fitness","Reach_Tier":"Macro","NAD_Alignment":9.0,"Device_Fit":7.0,"Access_Score":3.0,"Conference_Speaker":"Y","Audience_Type":"Scientists, biohackers, longevity","Best_Partnership":"Scientific validation only","Est_Sponsorship_Cost":"Not disclosed / selective","Practical_Notes":"Highly evidence-based; will require data. Low access.","Source_URL":"https://www.foundmyfitness.com"},{"Priority_Score":"6.4","Name":"Dr. Joseph Mercola","Category":"Physician/Author","Primary_Platform":"Newsletter, Website","Website":"https://www.mercola.com","Contact_Booking":"https://www.mercola.com/contact.htm","Instagram":"","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":6.0,"Device_Fit":5.0,"Access_Score":3.0,"Conference_Speaker":"N","Audience_Type":"Alternative health, natural wellness","Best_Partnership":"Niche only if alternative health angle needed","Est_Sponsorship_Cost":"Not disclosed","Practical_Notes":"Controversial; brand risk; lower priority.","Source_URL":"https://www.mercola.com"},{"Priority_Score":"6.8","Name":"Dr. Jolene Brighten","Category":"Physician/Author","Primary_Platform":"IG, Podcast, Book","Website":"https://drbrighten.com","Contact_Booking":"https://drbrighten.com/contact","Instagram":"https://www.instagram.com/drjolenebrighten/","YouTube":"","Podcast":"","Reach_Tier":"Macro","NAD_Alignment":7.0,"Device_Fit":7.0,"Access_Score":4.0,"Conference_Speaker":"Y","Audience_Type":"Women's hormones, post-birth control","Best_Partnership":"HaloRelax for women's hormone balance","Est_Sponsorship_Cost":"$5k-$20k","Practical_Notes":"Women's health niche; HaloRelax or recovery angle.","Source_URL":"https://drbrighten.com"}];
+
+const NAD_RAW = [{"Tier":"Tier 1","Company":"Restore Hyper Wellness","NAD_Protocol":"NAD+ IV, Niagen IV, IM injections in select markets","Website":"","Contact_Email":"","Headquarters":"Austin, TX","Location_Count":"225","Market_Coverage":"United States, 225+ studios","Est_Monthly_Clients":"180,000-350,000 system-wide/mo","Device_Compatibility":"IV Therapy; Red Light; Cryo; HBOT; Recovery","Notes":"Large national wellness chain with NAD/IV and recovery services; strong device-dealer fit."},{"Tier":"Tier 1","Company":"Prime IV Hydration & Wellness","NAD_Protocol":"NAD+ IV therapy; injections in select locations","Website":"","Contact_Email":"","Headquarters":"Scottsdale, AZ","Location_Count":"208","Market_Coverage":"United States; 42 states + DC sold/operating markets","Est_Monthly_Clients":"100,000-250,000 system-wide/mo","Device_Compatibility":"IV Therapy; Wellness Memberships","Notes":"Rapidly growing IV franchise; good fit for device placement across IV studios."},{"Tier":"Tier 1","Company":"iCRYO","NAD_Protocol":"NAD+ IV therapy; peptides in select markets","Website":"","Contact_Email":"","Headquarters":"Houston, TX","Location_Count":"100","Market_Coverage":"United States, 100+ locations","Est_Monthly_Clients":"50,000-150,000 system-wide/mo","Device_Compatibility":"Cryo; IV Therapy; Red Light; Recovery","Notes":"Cryotherapy-focused chain now expanding into IV; HNT recovery device fits well."},{"Tier":"Tier 1","Company":"Next Health","NAD_Protocol":"NAD+ IV, injections; functional medicine","Website":"","Contact_Email":"","Headquarters":"Los Angeles, CA","Location_Count":"9","Market_Coverage":"United States; major metros (LA, NYC, Chicago, Dallas, Houston, Miami)","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"IV Therapy; Longevity Medicine; Biomarker Testing","Notes":"Dr. Darshan Shah co-founder; premium longevity clinic; very strong HNT fit."},{"Tier":"Tier 1","Company":"Fountain Life","NAD_Protocol":"NAD+ IV; peptide therapy; longevity medicine","Website":"","Contact_Email":"","Headquarters":"Naples, FL","Location_Count":"6","Market_Coverage":"United States; UK expansion","Est_Monthly_Clients":"5,000-20,000 premium members/mo","Device_Compatibility":"Longevity Medicine; Diagnostics; IV Therapy","Notes":"Premium longevity concierge; Tony Robbins-affiliated; strong device fit for VIP clientele."},{"Tier":"Tier 1","Company":"The Biostation","NAD_Protocol":"NAD+ IV therapy; functional medicine protocols","Website":"","Contact_Email":"","Headquarters":"Delray Beach, FL","Location_Count":"4","Market_Coverage":"South Florida","Est_Monthly_Clients":"5,000-15,000/mo","Device_Compatibility":"IV Therapy; Hormone Optimization; Longevity","Notes":"South Florida longevity clinic; Carillon connection; strong regional HNT partner."},{"Tier":"Tier 1","Company":"Ways2Well","NAD_Protocol":"NAD+ IV; peptides; optimization programs","Website":"","Contact_Email":"","Headquarters":"Austin, TX","Location_Count":"5","Market_Coverage":"Texas and expanding","Est_Monthly_Clients":"5,000-20,000/mo","Device_Compatibility":"IV Therapy; Functional Medicine; Recovery","Notes":"Rapidly growing Texas longevity brand; good early device partner."},{"Tier":"Tier 1","Company":"Cenegenics","NAD_Protocol":"NAD+ as part of personalized longevity protocols","Website":"","Contact_Email":"","Headquarters":"Las Vegas, NV","Location_Count":"15","Market_Coverage":"United States; international locations","Est_Monthly_Clients":"15,000-50,000 members/mo","Device_Compatibility":"Longevity Medicine; Diagnostics; Hormone Therapy","Notes":"Premium longevity medicine company; physician-managed; strong device credibility fit."},{"Tier":"Tier 1","Company":"AgelessRx","NAD_Protocol":"NAD+ IV; NMN/NR supplements; telehealth longevity","Website":"","Contact_Email":"","Headquarters":"Ann Arbor, MI","Location_Count":"1 (telehealth)","Market_Coverage":"United States nationwide","Est_Monthly_Clients":"20,000-50,000 telehealth patients/mo","Device_Compatibility":"Telehealth Longevity; NAD Supplements","Notes":"Large telehealth NAD/longevity provider; possible DTC channel for home device users."},{"Tier":"Tier 1","Company":"Drip Hydration","NAD_Protocol":"NAD+ IV; mobile IV therapy","Website":"","Contact_Email":"","Headquarters":"Nationwide","Location_Count":"50","Market_Coverage":"United States; major metros","Est_Monthly_Clients":"50,000-150,000 system-wide/mo","Device_Compatibility":"Mobile IV; Recovery; Wellness","Notes":"Mobile IV chain; strong post-treatment device upsell potential."},{"Tier":"Tier 1","Company":"Hydrate IV Bar","NAD_Protocol":"NAD+ IV therapy; recovery","Website":"","Contact_Email":"","Headquarters":"Nashville, TN","Location_Count":"30","Market_Coverage":"Southeast and expanding US","Est_Monthly_Clients":"25,000-75,000 system-wide/mo","Device_Compatibility":"IV Therapy; Recovery; Wellness","Notes":"Growing IV chain; recovery device upsell opportunity."},{"Tier":"Tier 1","Company":"Vida-Flo Hydration","NAD_Protocol":"NAD+ IV therapy","Website":"","Contact_Email":"","Headquarters":"Atlanta, GA","Location_Count":"25","Market_Coverage":"Southeast US","Est_Monthly_Clients":"20,000-60,000 system-wide/mo","Device_Compatibility":"IV Therapy; Recovery; Wellness","Notes":"Southeast IV chain; recovery and relaxation device fit."},{"Tier":"Tier 2","Company":"LIVE Hydration Spa","NAD_Protocol":"NAD+ IV therapy","Website":"","Contact_Email":"","Headquarters":"San Antonio, TX","Location_Count":"8","Market_Coverage":"Texas","Est_Monthly_Clients":"5,000-20,000/mo","Device_Compatibility":"IV Therapy; Wellness Spa","Notes":"Texas IV spa; premium location type for device placement."},{"Tier":"Tier 2","Company":"Mobile IV Medics","NAD_Protocol":"NAD+ IV; mobile therapy","Website":"","Contact_Email":"","Headquarters":"Los Angeles, CA","Location_Count":"20","Market_Coverage":"California and Southwest","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"Mobile IV; Recovery","Notes":"Mobile IV service; device co-sell opportunity post-treatment."},{"Tier":"Tier 2","Company":"IV Elements","NAD_Protocol":"NAD+ IV; peptide options","Website":"","Contact_Email":"","Headquarters":"Denver, CO","Location_Count":"3","Market_Coverage":"Colorado","Est_Monthly_Clients":"2,000-10,000/mo","Device_Compatibility":"IV Therapy; Recovery; Longevity","Notes":"Colorado IV clinic; small but premium patient base."},{"Tier":"Tier 2","Company":"Remedy Place","NAD_Protocol":"Social wellness; IV; recovery","Website":"","Contact_Email":"","Headquarters":"Los Angeles, CA","Location_Count":"4","Market_Coverage":"Los Angeles; New York","Est_Monthly_Clients":"5,000-20,000/mo","Device_Compatibility":"Social Wellness; IV Therapy; Cryo; Recovery","Notes":"Premium social wellness club; strong brand fit for HNT device experience."},{"Tier":"Tier 2","Company":"Upgrade Labs","NAD_Protocol":"Biohacking; NAD optional","Website":"","Contact_Email":"","Headquarters":"Los Angeles, CA","Location_Count":"8","Market_Coverage":"United States","Est_Monthly_Clients":"5,000-20,000/mo","Device_Compatibility":"Biohacking; Recovery; PEMF; Red Light","Notes":"Dave Asprey biohacking franchise; device placement ideal in biohacking context."},{"Tier":"Tier 2","Company":"Defy Medical","NAD_Protocol":"NAD+ IV; peptide therapy; TRT","Website":"","Contact_Email":"","Headquarters":"Tampa, FL","Location_Count":"2","Market_Coverage":"Florida; telehealth nationwide","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"IV Therapy; Peptides; TRT","Notes":"Florida longevity clinic with telehealth; peptide/NAD audience strong fit."},{"Tier":"Tier 2","Company":"Aspire Rejuvenation Clinic","NAD_Protocol":"NAD+ IV; peptides; aesthetics","Website":"","Contact_Email":"","Headquarters":"Multiple","Location_Count":"10","Market_Coverage":"Southeast and Mid-Atlantic US","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"IV Therapy; Aesthetics; Longevity","Notes":"Multi-location longevity clinic; good device fit in IV-adjacent services."},{"Tier":"Tier 2","Company":"Wild Health","NAD_Protocol":"Genomics-guided longevity; NAD protocols","Website":"","Contact_Email":"","Headquarters":"Lexington, KY","Location_Count":"1 + telehealth","Market_Coverage":"United States nationwide","Est_Monthly_Clients":"10,000-30,000 telehealth/mo","Device_Compatibility":"Telehealth; Genomic Medicine; Longevity","Notes":"Genomic precision medicine; physician-managed NAD protocols."},{"Tier":"Tier 2","Company":"Amen Clinics","NAD_Protocol":"NAD+ IV; brain health protocols","Website":"","Contact_Email":"","Headquarters":"Costa Mesa, CA","Location_Count":"11","Market_Coverage":"United States","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"Brain Health; IV Therapy; Integrative Medicine","Notes":"Brain health focus with NAD; cognitive/mental clarity angle for HNT."},{"Tier":"Tier 2","Company":"Awaremed Health & Wellness Resource Center","NAD_Protocol":"NAD+ IV; addiction recovery; brain reset","Website":"","Contact_Email":"","Headquarters":"Williamsburg, VA","Location_Count":"2","Market_Coverage":"East Coast","Est_Monthly_Clients":"1,000-5,000/mo","Device_Compatibility":"NAD Brain Reset; Addiction Recovery; Longevity","Notes":"NAD addiction protocol specialist; very strong NAD alignment."},{"Tier":"Tier 2","Company":"Revitalize Medical Group","NAD_Protocol":"NAD+ IV; peptides; hormone therapy","Website":"","Contact_Email":"","Headquarters":"Multiple","Location_Count":"5","Market_Coverage":"Southwest US","Est_Monthly_Clients":"5,000-15,000/mo","Device_Compatibility":"IV Therapy; Peptides; Longevity","Notes":"Southwest longevity group; device placement in IV/peptide context."},{"Tier":"Tier 2","Company":"Bespoke Treatments","NAD_Protocol":"NAD+ IV; ketamine; mental health","Website":"","Contact_Email":"","Headquarters":"Los Angeles, CA","Location_Count":"3","Market_Coverage":"California; New York","Est_Monthly_Clients":"2,000-8,000/mo","Device_Compatibility":"IV Therapy; Mental Health; Recovery","Notes":"Mental health/NAD IV clinic; HaloRelax angle strong."},{"Tier":"Tier 2","Company":"Clean Market","NAD_Protocol":"IV; wellness; NAD optional","Website":"","Contact_Email":"","Headquarters":"New York, NY","Location_Count":"3","Market_Coverage":"New York City","Est_Monthly_Clients":"5,000-15,000/mo","Device_Compatibility":"Wellness Retail; IV; Biohacking","Notes":"NYC wellness hub; strong device co-sell environment."},{"Tier":"Tier 2","Company":"REVIV Global","NAD_Protocol":"NAD+ IV; global IV therapy franchise","Website":"","Contact_Email":"","Headquarters":"Miami, FL","Location_Count":"100","Market_Coverage":"United States; International","Est_Monthly_Clients":"50,000+ system-wide/mo","Device_Compatibility":"IV Therapy; Recovery; International Markets","Notes":"Global IV franchise; international device distribution potential."},{"Tier":"Tier 2","Company":"Hydralive Therapy","NAD_Protocol":"NAD+ IV; recovery","Website":"","Contact_Email":"","Headquarters":"Birmingham, AL","Location_Count":"5","Market_Coverage":"Southeast US","Est_Monthly_Clients":"5,000-15,000/mo","Device_Compatibility":"IV Therapy; Recovery; Wellness","Notes":"Southeast IV clinic group; recovery device fit."},{"Tier":"Tier 2","Company":"The DRIPBaR","NAD_Protocol":"NAD+ IV; wellness memberships","Website":"","Contact_Email":"","Headquarters":"Louisville, KY","Location_Count":"80","Market_Coverage":"United States, 80+ locations","Est_Monthly_Clients":"50,000-100,000 system-wide/mo","Device_Compatibility":"IV Therapy; Memberships; Recovery","Notes":"Growing national IV franchise; device placement across locations."},{"Tier":"Tier 2","Company":"RestorePDX / Hydration Room","NAD_Protocol":"NAD+ IV; recovery protocols","Website":"","Contact_Email":"","Headquarters":"Portland, OR","Location_Count":"10","Market_Coverage":"Pacific Northwest; California","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"IV Therapy; Recovery; Wellness","Notes":"Pacific Northwest IV chain; device placement opportunity."},{"Tier":"Tier 2","Company":"Nurse Hydration","NAD_Protocol":"NAD+ IV; mobile therapy","Website":"","Contact_Email":"","Headquarters":"Nationwide","Location_Count":"20","Market_Coverage":"United States","Est_Monthly_Clients":"10,000-30,000/mo","Device_Compatibility":"Mobile IV; Recovery; Nurse-Administered","Notes":"Nurse-led mobile IV; home device recommendation pathway."},{"Tier":"Tier 3","Company":"IV League Hydration","NAD_Protocol":"NAD+ IV; wellness","Website":"","Contact_Email":"","Headquarters":"Multiple","Location_Count":"5","Market_Coverage":"Mid-Atlantic US","Est_Monthly_Clients":"2,000-8,000/mo","Device_Compatibility":"IV Therapy; Recovery","Notes":"Smaller IV chain; good for test market."},{"Tier":"Tier 3","Company":"The IV Doc","NAD_Protocol":"NAD+ IV; mobile","Website":"","Contact_Email":"","Headquarters":"New York, NY","Location_Count":"15","Market_Coverage":"Major US metros","Est_Monthly_Clients":"10,000-25,000/mo","Device_Compatibility":"Mobile IV; Concierge Wellness","Notes":"Luxury mobile IV; high-end consumer fit."},{"Tier":"Tier 3","Company":"Elite Personalized Medicine","NAD_Protocol":"NAD+ IV; peptides; longevity","Website":"","Contact_Email":"","Headquarters":"Multiple","Location_Count":"3","Market_Coverage":"Midwest US","Est_Monthly_Clients":"2,000-8,000/mo","Device_Compatibility":"Longevity Medicine; Peptides","Notes":"Midwest longevity clinic; lower priority but good fit."},{"Tier":"Tier 3","Company":"R3 Health","NAD_Protocol":"NAD+ IV; hormone therapy; recovery","Website":"","Contact_Email":"","Headquarters":"Scottsdale, AZ","Location_Count":"5","Market_Coverage":"Southwest US","Est_Monthly_Clients":"3,000-10,000/mo","Device_Compatibility":"IV Therapy; Hormones; Recovery","Notes":"Arizona longevity group; device fit in premium IV setting."},{"Tier":"Tier 3","Company":"ViveWell Health","NAD_Protocol":"NAD+ IV; wellness","Website":"","Contact_Email":"","Headquarters":"Denver, CO","Location_Count":"2","Market_Coverage":"Colorado","Est_Monthly_Clients":"1,000-5,000/mo","Device_Compatibility":"IV Therapy; Wellness","Notes":"Colorado IV clinic; small but premium."},{"Tier":"Tier 3","Company":"Jupiter Medical Aesthetics / Longevity Clinics","NAD_Protocol":"NAD+ IV; aesthetics","Website":"","Contact_Email":"","Headquarters":"Jupiter, FL","Location_Count":"2","Market_Coverage":"South Florida","Est_Monthly_Clients":"2,000-8,000/mo","Device_Compatibility":"IV Therapy; Aesthetics; Longevity","Notes":"South Florida longevity/aesthetics clinic; near Carillon market."},{"Tier":"Tier 3","Company":"B12 Love / IV Wellness Clinics","NAD_Protocol":"NAD+ IV; B12; wellness","Website":"","Contact_Email":"","Headquarters":"Multiple","Location_Count":"10","Market_Coverage":"United States","Est_Monthly_Clients":"5,000-15,000/mo","Device_Compatibility":"IV Therapy; Wellness","Notes":"B12 and IV wellness chain; add-on device opportunity."},{"Tier":"Tier 3","Company":"GNC","NAD_Protocol":"NAD supplements retail","Website":"","Contact_Email":"","Headquarters":"Pittsburgh, PA","Location_Count":"2500","Market_Coverage":"United States; International","Est_Monthly_Clients":"5,000,000+ consumers/mo","Device_Compatibility":"Supplement Retail; Mass Market","Notes":"Mass market retail; not ideal for premium device but possible supplement channel."},{"Tier":"Tier 3","Company":"The Vitamin Shoppe","NAD_Protocol":"NAD supplements retail","Website":"","Contact_Email":"","Headquarters":"Secaucus, NJ","Location_Count":"650","Market_Coverage":"United States","Est_Monthly_Clients":"2,000,000+ consumers/mo","Device_Compatibility":"Supplement Retail; Consumer Wellness","Notes":"Large supplement retail chain; possible channel if consumer device positioning developed."}];
+
+// ===================== STATE =====================
+const STATUSES = ['New','Contacted','In-Progress','Proposal-Sent','Closed-Won','Nurture'];
+let state = {};
+let activityLog = [];
+
+function stateKey(type, name) { return `${type}::${name}`; }
+
+function getRecord(type, name) {
+  const k = stateKey(type, name);
+  if (!state[k]) {
+    state[k] = { status: 'New', notes: [], lastNote: '' };
+  }
+  return state[k];
+}
+
+function saveRecord(type, name, status, note) {
+  const k = stateKey(type, name);
+  state[k] = state[k] || { status: 'New', notes: [], lastNote: '' };
+  const prev = state[k].status;
+  state[k].status = status;
+  if (note && note.trim()) {
+    const entry = { date: new Date().toLocaleDateString(), text: note.trim() };
+    state[k].notes.unshift(entry);
+    state[k].lastNote = note.trim();
+    activityLog.unshift({ type, name, status, note: note.trim(), time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+    if (activityLog.length > 20) activityLog.pop();
+  }
+  if (prev !== status) {
+    activityLog.unshift({ type, name, status, note: `Status → ${status}`, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+    if (activityLog.length > 20) activityLog.pop();
+  }
+  updateStats();
+  renderActivityLog();
+  renderFunnel();
+}
+
+// ===================== STATS =====================
+function updateStats() {
+  const all = Object.values(state);
+  const active = all.filter(r => ['Contacted','In-Progress','Proposal-Sent'].includes(r.status)).length;
+  const won = all.filter(r => r.status === 'Closed-Won').length;
+  const tier1 = [...WL_RAW.filter(r=>r.Tier==='Tier 1'), ...NAD_RAW.filter(r=>r.Tier==='Tier 1'), ...INF_RAW.filter(r=>parseFloat(r.Priority_Score)>=8.5)].length;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-won').textContent = won;
+  document.getElementById('kpi-active').textContent = active;
+  document.getElementById('kpi-won').textContent = won;
+  document.getElementById('kpi-tier1').textContent = tier1;
+}
+
+// ===================== FUNNEL =====================
+function renderFunnel() {
+  const all = [];
+  WL_RAW.forEach(r => all.push(getRecord('wl', r.Company)));
+  INF_RAW.forEach(r => all.push(getRecord('inf', r.Name)));
+  NAD_RAW.forEach(r => all.push(getRecord('nad', r.Company)));
+  
+  const counts = {};
+  STATUSES.forEach(s => counts[s] = 0);
+  all.forEach(r => counts[r.status] = (counts[r.status]||0) + 1);
+  const max = Math.max(...Object.values(counts), 1);
+  const colors = { 'New':'#4fc3f7','Contacted':'#c9a84c','In-Progress':'#ab47bc','Proposal-Sent':'#ff7043','Closed-Won':'#66bb6a','Nurture':'#8da0b3' };
+  const labels = { 'New':'New','Contacted':'Contacted','In-Progress':'In Progress','Proposal-Sent':'Proposal','Closed-Won':'Closed Won','Nurture':'Nurture' };
+  const el = document.getElementById('funnel-chart');
+  el.innerHTML = STATUSES.map(s => `
+    <div class="funnel-row">
+      <div class="funnel-label">${labels[s]}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${Math.max(4,(counts[s]/max)*100)}%;background:${colors[s]}"></div>
+      </div>
+      <div class="funnel-count">${counts[s]}</div>
+    </div>
+  `).join('');
+}
+
+function renderActivityLog() {
+  const el = document.getElementById('activity-log');
+  if (!activityLog.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px;font-size:12px;">No activity yet. Start by updating contact statuses.</div>';
+    return;
+  }
+  const typeLabels = { wl: '🏷️', inf: '⭐', nad: '🏥' };
+  el.innerHTML = activityLog.slice(0,8).map(a => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.status==='Closed-Won'?'#66bb6a':a.status==='Contacted'?'#c9a84c':'#4fc3f7'}"></div>
+      <div>
+        <div class="activity-text">${typeLabels[a.type]||''} <span class="activity-name">${a.name}</span> — ${a.note}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===================== FILTERS =====================
+let infFilter = 'all', wlFilter = 'all', nadFilter = 'all', allFilter = 'all';
+
+function filterInf(btn, f) { infFilter = f; document.querySelectorAll('#view-influencers .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderInf(); }
+function filterWL(btn, f) { wlFilter = f; document.querySelectorAll('#view-whitelabel .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderWL(); }
+function filterNAD(btn, f) { nadFilter = f; document.querySelectorAll('#view-dealers .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderNAD(); }
+function filterAll(btn, f) { allFilter = f; document.querySelectorAll('#view-pipeline .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderAll(); }
+
+// ===================== RENDER TABLES =====================
+function tierClass(t) {
+  if (!t) return '';
+  const n = t.toString().replace(/\D/g,'');
+  return `tier-${n}`;
+}
+function tierLabel(t) {
+  if (!t) return '';
+  const n = t.toString().replace(/\D/g,'');
+  return `<span class="tier-badge tier-${n}">T${n}</span>`;
+}
+function statusBadge(s) { return `<span class="status-badge status-${s.replace(/\s/g,'-')}">${s}</span>`; }
+function scoreClass(v) { const n = parseFloat(v); return n >= 8.5 ? 'score-high' : n >= 7 ? 'score-mid' : 'score-low'; }
+
+function renderInf() {
+  const q = document.getElementById('search-inf').value.toLowerCase();
+  let data = INF_RAW;
+  if (infFilter === 'Tier 1') data = data.filter(r => parseFloat(r.Priority_Score) >= 8.5);
+  else if (infFilter === 'Tier 2') data = data.filter(r => parseFloat(r.Priority_Score) >= 7 && parseFloat(r.Priority_Score) < 8.5);
+  else if (infFilter === 'New') data = data.filter(r => getRecord('inf', r.Name).status === 'New');
+  if (q) data = data.filter(r => (r.Name+r.Category+r.Primary_Platform).toLowerCase().includes(q));
+  data.sort((a,b) => parseFloat(b.Priority_Score) - parseFloat(a.Priority_Score));
+  
+  const tbody = document.getElementById('inf-tbody');
+  tbody.innerHTML = data.map(r => {
+    const rec = getRecord('inf', r.Name);
+    return `<tr onclick="openDetail('inf','${r.Name.replace(/'/g,"\\'")}')">
+      <td><span class="score-pill ${scoreClass(r.Priority_Score)}">${r.Priority_Score}</span></td>
+      <td><strong>${r.Name}</strong><br><span style="color:var(--muted);font-size:11px">${r.Category}</span></td>
+      <td style="color:var(--muted);font-size:12px">${r.Primary_Platform}</td>
+      <td><span class="tier-badge ${r.Reach_Tier==='Macro'?'tier-1':r.Reach_Tier==='Mid-tier'?'tier-2':'tier-3'}">${r.Reach_Tier||''}</span></td>
+      <td style="color:var(--muted);font-size:12px">${r.Est_Sponsorship_Cost||''}</td>
+      <td onclick="event.stopPropagation()">${statusBadge(rec.status)}</td>
+      <td onclick="event.stopPropagation()"><button class="action-btn" onclick="openDetail('inf','${r.Name.replace(/'/g,"\\'")}')">Update</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderWL() {
+  const q = document.getElementById('search-wl').value.toLowerCase();
+  let data = WL_RAW;
+  if (wlFilter === 'Tier 1') data = data.filter(r => r.Tier === 'Tier 1');
+  else if (wlFilter === 'Tier 2') data = data.filter(r => r.Tier === 'Tier 2');
+  else if (wlFilter === 'New') data = data.filter(r => getRecord('wl', r.Company).status === 'New');
+  if (q) data = data.filter(r => (r.Company+r.Headquarters+r.Contact_Email).toLowerCase().includes(q));
+  
+  const tbody = document.getElementById('wl-tbody');
+  tbody.innerHTML = data.map(r => {
+    const rec = getRecord('wl', r.Company);
+    const email = r.Contact_Email && r.Contact_Email !== 'Contact Page' ? `<a href="mailto:${r.Contact_Email}" onclick="event.stopPropagation()" style="color:var(--teal);font-size:11px">${r.Contact_Email}</a>` : `<span style="color:var(--muted);font-size:11px">—</span>`;
+    return `<tr onclick="openDetail('wl','${r.Company.replace(/'/g,"\\'")}')">
+      <td>${tierLabel(r.Tier)}</td>
+      <td><strong>${r.Company}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${r.Headquarters}</td>
+      <td style="color:var(--muted);font-size:11px">${r.Est_Monthly_Clients}</td>
+      <td onclick="event.stopPropagation()">${email}</td>
+      <td onclick="event.stopPropagation()">${statusBadge(rec.status)}</td>
+      <td onclick="event.stopPropagation()"><button class="action-btn" onclick="openDetail('wl','${r.Company.replace(/'/g,"\\'")}')">Update</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderNAD() {
+  const q = document.getElementById('search-nad').value.toLowerCase();
+  let data = NAD_RAW;
+  if (nadFilter === 'Tier 1') data = data.filter(r => r.Tier === 'Tier 1');
+  else if (nadFilter === 'Tier 2') data = data.filter(r => r.Tier === 'Tier 2');
+  else if (nadFilter === 'New') data = data.filter(r => getRecord('nad', r.Company).status === 'New');
+  if (q) data = data.filter(r => (r.Company+r.Headquarters+r.Market_Coverage).toLowerCase().includes(q));
+  
+  const tbody = document.getElementById('nad-tbody');
+  tbody.innerHTML = data.map(r => {
+    const rec = getRecord('nad', r.Company);
+    return `<tr onclick="openDetail('nad','${r.Company.replace(/'/g,"\\'")}')">
+      <td>${tierLabel(r.Tier)}</td>
+      <td><strong>${r.Company}</strong><br><span style="color:var(--muted);font-size:11px">${r.NAD_Protocol||''}</span></td>
+      <td style="color:var(--muted);font-size:12px">${r.Headquarters}</td>
+      <td style="color:var(--muted);font-size:12px">${r.Location_Count||'—'}</td>
+      <td style="color:var(--muted);font-size:11px">${r.Est_Monthly_Clients}</td>
+      <td onclick="event.stopPropagation()">${statusBadge(rec.status)}</td>
+      <td onclick="event.stopPropagation()"><button class="action-btn" onclick="openDetail('nad','${r.Company.replace(/'/g,"\\'")}')">Update</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll() {
+  const q = document.getElementById('search-all').value.toLowerCase();
+  let all = [
+    ...INF_RAW.map(r => ({ type:'Influencer', name: r.Name, tier: parseFloat(r.Priority_Score)>=8.5?'Tier 1':parseFloat(r.Priority_Score)>=7?'Tier 2':'Tier 3', contact: r.Contact_Booking, typeKey:'inf', raw:r })),
+    ...WL_RAW.map(r => ({ type:'White Label', name: r.Company, tier: r.Tier, contact: r.Contact_Email, typeKey:'wl', raw:r })),
+    ...NAD_RAW.map(r => ({ type:'NAD Dealer', name: r.Company, tier: r.Tier, contact: r.Contact_Email, typeKey:'nad', raw:r }))
+  ];
+  if (allFilter !== 'all' && ['Influencer','White Label','NAD Dealer'].includes(allFilter)) all = all.filter(r => r.type === allFilter);
+  else if (allFilter !== 'all') all = all.filter(r => getRecord(r.typeKey, r.name).status === allFilter);
+  if (q) all = all.filter(r => (r.name+r.type).toLowerCase().includes(q));
+  
+  const segColors = { 'Influencer':'var(--gold)','White Label':'var(--teal)','NAD Dealer':'#ce93d8' };
+  const tbody = document.getElementById('all-tbody');
+  tbody.innerHTML = all.map(r => {
+    const rec = getRecord(r.typeKey, r.name);
+    const lastNote = rec.notes[0] ? `<span style="color:var(--muted);font-size:11px">${rec.notes[0].text.substring(0,40)}${rec.notes[0].text.length>40?'…':''}</span>` : `<span style="color:var(--muted);font-size:11px">—</span>`;
+    const tierLabel2 = r.tier ? `<span class="tier-badge ${tierClass(r.tier)}">${r.tier}</span>` : '';
+    return `<tr onclick="openDetail('${r.typeKey}','${r.name.replace(/'/g,"\\'")}')">
+      <td><span style="color:${segColors[r.type]||'var(--muted)'};font-size:11px;font-weight:600">${r.type}</span></td>
+      <td><strong>${r.name}</strong></td>
+      <td>${tierLabel2}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.contact&&r.contact!=='Contact Page'?r.contact.substring(0,30):'—'}</td>
+      <td onclick="event.stopPropagation()">${statusBadge(rec.status)}</td>
+      <td>${lastNote}</td>
+      <td onclick="event.stopPropagation()"><button class="action-btn" onclick="openDetail('${r.typeKey}','${r.name.replace(/'/g,"\\'")}')">Update</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===================== DETAIL PANEL =====================
+let currentDetail = null;
+
+function openDetail(type, name) {
+  currentDetail = { type, name };
+  const rec = getRecord(type, name);
+  let raw, typeLabel, tagClass, extra = '';
+  
+  if (type === 'inf') {
+    raw = INF_RAW.find(r => r.Name === name);
+    typeLabel = 'Influencer'; tagClass = 'tag-inf';
+    extra = `
+      <div class="detail-section-title">Scores</div>
+      <div class="detail-row"><span class="detail-row-label">Priority Score</span><span class="detail-row-val">${raw.Priority_Score}</span></div>
+      <div class="detail-row"><span class="detail-row-label">NAD Alignment</span><span class="detail-row-val">${raw.NAD_Alignment}/10</span></div>
+      <div class="detail-row"><span class="detail-row-label">Device Fit</span><span class="detail-row-val">${raw.Device_Fit}/10</span></div>
+      <div class="detail-row"><span class="detail-row-label">Access Score</span><span class="detail-row-val">${raw.Access_Score}/10</span></div>
+      <div class="detail-row"><span class="detail-row-label">Reach Tier</span><span class="detail-row-val">${raw.Reach_Tier}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Est. Cost</span><span class="detail-row-val">${raw.Est_Sponsorship_Cost}</span></div>
+      <hr class="detail-divider">
+      <div class="detail-section-title">Partnership</div>
+      <div class="detail-row"><span class="detail-row-label">Best Play</span><span class="detail-row-val">${raw.Best_Partnership}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Audience</span><span class="detail-row-val">${raw.Audience_Type}</span></div>
+      ${raw.Podcast ? `<div class="detail-row"><span class="detail-row-label">Podcast</span><span class="detail-row-val">${raw.Podcast}</span></div>` : ''}
+      ${raw.Instagram ? `<div class="detail-row"><span class="detail-row-label">Instagram</span><span class="detail-row-val"><a href="${raw.Instagram}" target="_blank" class="link-btn">↗ Profile</a></span></div>` : ''}
+      ${raw.Contact_Booking ? `<div class="detail-row"><span class="detail-row-label">Contact</span><span class="detail-row-val"><a href="${raw.Contact_Booking}" target="_blank" class="link-btn">↗ Book</a></span></div>` : ''}
+      <hr class="detail-divider">
+      <div class="detail-section-title">Notes from Data</div>
+      <div class="detail-notes">${raw.Practical_Notes}</div>
+    `;
+  } else if (type === 'wl') {
+    raw = WL_RAW.find(r => r.Company === name);
+    typeLabel = 'White Label'; tagClass = 'tag-wl';
+    extra = `
+      <div class="detail-section-title">Details</div>
+      <div class="detail-row"><span class="detail-row-label">Tier</span><span class="detail-row-val">${raw.Tier}</span></div>
+      <div class="detail-row"><span class="detail-row-label">HQ</span><span class="detail-row-val">${raw.Headquarters}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Monthly Clients</span><span class="detail-row-val">${raw.Est_Monthly_Clients}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Device Fit</span><span class="detail-row-val">${raw.Device_Compatibility}</span></div>
+      ${raw.Contact_Email && raw.Contact_Email !== 'Contact Page' ? `<div class="detail-row"><span class="detail-row-label">Email</span><span class="detail-row-val"><a href="mailto:${raw.Contact_Email}" class="link-btn">✉ ${raw.Contact_Email}</a></span></div>` : ''}
+      <hr class="detail-divider">
+      <div class="detail-section-title">Notes from Data</div>
+      <div class="detail-notes">${raw.Notes}</div>
+    `;
+  } else {
+    raw = NAD_RAW.find(r => r.Company === name);
+    typeLabel = 'NAD Dealer'; tagClass = 'tag-nad';
+    extra = `
+      <div class="detail-section-title">Details</div>
+      <div class="detail-row"><span class="detail-row-label">Tier</span><span class="detail-row-val">${raw.Tier}</span></div>
+      <div class="detail-row"><span class="detail-row-label">HQ</span><span class="detail-row-val">${raw.Headquarters}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Locations</span><span class="detail-row-val">${raw.Location_Count||'—'}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Coverage</span><span class="detail-row-val">${raw.Market_Coverage}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Monthly Clients</span><span class="detail-row-val">${raw.Est_Monthly_Clients}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Protocol</span><span class="detail-row-val">${raw.NAD_Protocol}</span></div>
+      <hr class="detail-divider">
+      <div class="detail-section-title">Notes from Data</div>
+      <div class="detail-notes">${raw.Notes}</div>
+    `;
+  }
+
+  const noteLog = rec.notes.length ? `
+    <hr class="detail-divider">
+    <div class="detail-section-title">Activity Log</div>
+    <div class="note-log">${rec.notes.map(n=>`<div class="note-entry"><div class="note-entry-date">${n.date}</div><div class="note-entry-text">${n.text}</div></div>`).join('')}</div>
+  ` : '';
+
+  document.getElementById('detail-content').innerHTML = `
+    <span class="detail-type-tag ${tagClass}">${typeLabel}</span>
+    <div class="detail-name">${name}</div>
+    <div class="detail-meta">${raw.Headquarters || raw.Primary_Platform || ''} · ${raw.Reach_Tier || raw.Tier || ''}</div>
+    <hr class="detail-divider">
+    ${extra}
+    <hr class="detail-divider">
+    <div class="detail-section-title">Update Status</div>
+    <select class="detail-status-select" id="status-select">
+      ${STATUSES.map(s=>`<option value="${s}" ${s===rec.status?'selected':''}>${s}</option>`).join('')}
+    </select>
+    <textarea class="detail-note-input" id="note-input" placeholder="Add a note (call made, email sent, meeting scheduled…)"></textarea>
+    <button class="save-btn" onclick="saveFromPanel()">Save Update</button>
+    ${noteLog}
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function saveFromPanel() {
+  if (!currentDetail) return;
+  const status = document.getElementById('status-select').value;
+  const note = document.getElementById('note-input').value;
+  saveRecord(currentDetail.type, currentDetail.name, status, note);
+  openDetail(currentDetail.type, currentDetail.name);
+  // Re-render active table
+  const views = { inf: renderInf, wl: renderWL, nad: renderNAD };
+  if (views[currentDetail.type]) views[currentDetail.type]();
+  renderAll();
+}
+
+function closeDetail(e) { if (e.target === document.getElementById('detail-overlay')) closeDetailPanel(); }
+function closeDetailPanel() { document.getElementById('detail-overlay').classList.remove('open'); }
+
+// ===================== NAV =====================
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (v==='influencers') renderInf();
+  else if (v==='whitelabel') renderWL();
+  else if (v==='dealers') renderNAD();
+  else if (v==='pipeline') renderAll();
+  else if (v==='dashboard') { renderFunnel(); renderActivityLog(); }
+}
+
+// ===================== INIT =====================
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('kpi-total').textContent = WL_RAW.length + INF_RAW.length + NAD_RAW.length;
+document.getElementById('stat-total').textContent = WL_RAW.length + INF_RAW.length + NAD_RAW.length;
+renderFunnel();
+renderActivityLog();
+updateStats();
+</script>
+</body>
+</html>
