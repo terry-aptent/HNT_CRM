@@ -130,6 +130,12 @@
   .fade-in { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
+  /* SORTABLE HEADERS */
+  .sortable { cursor:pointer; user-select:none; }
+  .sortable:hover { color:var(--teal); }
+  .sort-asc::after { content:' ↑'; color:var(--teal); }
+  .sort-desc::after { content:' ↓'; color:var(--teal); }
+
   /* LOADING SPINNER */
   .spinner-overlay { display:none; position:fixed; inset:0; background:rgba(13,27,42,0.85); z-index:500; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
   .spinner-overlay.active { display:flex; }
@@ -300,7 +306,7 @@
         <button class="filter-btn" onclick="filterInf(this,'Prospect')">Not Contacted</button>
       </div>
       <div class="table-wrap">
-        <table><thead><tr><th>Score</th><th>Name</th><th>Category</th><th>Platform</th><th>Reach</th><th>Status</th><th>Action</th></tr></thead>
+        <table><thead><tr><th onclick="sortInf('score')" class="sortable">Score <span id="sort-inf-score"></span></th><th onclick="sortInf('name')" class="sortable">Name <span id="sort-inf-name"></span></th><th>Category</th><th>Platform</th><th onclick="sortInf('reach')" class="sortable">Reach <span id="sort-inf-reach"></span></th><th onclick="sortInf('status')" class="sortable">Status <span id="sort-inf-status"></span></th><th>Action</th></tr></thead>
         <tbody id="inf-tbody"></tbody></table>
       </div>
     </div>
@@ -315,7 +321,7 @@
         <button class="filter-btn" onclick="filterWL(this,'Prospect')">Not Contacted</button>
       </div>
       <div class="table-wrap">
-        <table><thead><tr><th>Tier</th><th>Company</th><th>HQ</th><th>Monthly Clients</th><th>Contact</th><th>Status</th><th>Action</th></tr></thead>
+        <table><thead><tr><th onclick="sortWL('tier')" class="sortable">Tier <span id="sort-wl-tier"></span></th><th onclick="sortWL('name')" class="sortable">Company <span id="sort-wl-name"></span></th><th onclick="sortWL('hq')" class="sortable">HQ <span id="sort-wl-hq"></span></th><th>Monthly Clients</th><th>Contact</th><th onclick="sortWL('status')" class="sortable">Status <span id="sort-wl-status"></span></th><th>Action</th></tr></thead>
         <tbody id="wl-tbody"></tbody></table>
       </div>
     </div>
@@ -330,7 +336,7 @@
         <button class="filter-btn" onclick="filterNAD(this,'Prospect')">Not Contacted</button>
       </div>
       <div class="table-wrap">
-        <table><thead><tr><th>Tier</th><th>Company</th><th>HQ</th><th>Locations</th><th>Monthly Clients</th><th>Status</th><th>Action</th></tr></thead>
+        <table><thead><tr><th onclick="sortNAD('tier')" class="sortable">Tier <span id="sort-nad-tier"></span></th><th onclick="sortNAD('name')" class="sortable">Company <span id="sort-nad-name"></span></th><th onclick="sortNAD('hq')" class="sortable">HQ <span id="sort-nad-hq"></span></th><th onclick="sortNAD('locations')" class="sortable">Locations <span id="sort-nad-locations"></span></th><th>Monthly Clients</th><th onclick="sortNAD('status')" class="sortable">Status <span id="sort-nad-status"></span></th><th>Action</th></tr></thead>
         <tbody id="nad-tbody"></tbody></table>
       </div>
     </div>
@@ -348,7 +354,7 @@
         <button class="filter-btn" onclick="filterAll(this,'Active Partner')">Active Partner</button>
       </div>
       <div class="table-wrap">
-        <table><thead><tr><th>Segment</th><th>Name / Company</th><th>Tier / Score</th><th>Contact</th><th>Status</th><th>Last Note</th><th>Action</th></tr></thead>
+        <table><thead><tr><th onclick="sortAll('type')" class="sortable">Segment <span id="sort-all-type"></span></th><th onclick="sortAll('name')" class="sortable">Name / Company <span id="sort-all-name"></span></th><th onclick="sortAll('tier')" class="sortable">Tier / Score <span id="sort-all-tier"></span></th><th>Contact</th><th onclick="sortAll('status')" class="sortable">Status <span id="sort-all-status"></span></th><th>Last Note</th><th>Action</th></tr></thead>
         <tbody id="all-tbody"></tbody></table>
       </div>
     </div>
@@ -397,6 +403,8 @@ async function loadContactsFromSheet() {
       Pipeline_Status: c['Pipeline Status'] || 'Prospect',
       Last_Notes: c['Last Contact Notes'] || '',
       Last_Contacted: c['Last Contacted Date'] || '',
+      Next_Action: c['Next Action'] || '',
+      Next_Action_Date: c['Next Action Date'] || '',
     }));
 
     WL_RAW = contacts.filter(c => c['Contact Type'] === 'White Label').map(c => ({
@@ -412,6 +420,8 @@ async function loadContactsFromSheet() {
       Pipeline_Status: c['Pipeline Status'] || 'Prospect',
       Last_Notes: c['Last Contact Notes'] || '',
       Last_Contacted: c['Last Contacted Date'] || '',
+      Next_Action: c['Next Action'] || '',
+      Next_Action_Date: c['Next Action Date'] || '',
     }));
 
     NAD_RAW = contacts.filter(c => c['Contact Type'] === 'NAD Dealer').map(c => ({
@@ -430,6 +440,8 @@ async function loadContactsFromSheet() {
       Pipeline_Status: c['Pipeline Status'] || 'Prospect',
       Last_Notes: c['Last Contact Notes'] || '',
       Last_Contacted: c['Last Contacted Date'] || '',
+      Next_Action: c['Next Action'] || '',
+      Next_Action_Date: c['Next Action Date'] || '',
     }));
 
     return true;
@@ -517,7 +529,7 @@ function renderFunnel() {
   const max = Math.max(...Object.values(counts), 1);
   const colors = { 'Prospect':'#4fc3f7','Contacted':'#c9a84c','In Discussion':'#ab47bc','Proposal Sent':'#ff7043','Active Partner':'#66bb6a','On Hold':'#8da0b3','Declined':'#ef5350' };
   document.getElementById('funnel-chart').innerHTML = STATUSES.map(s => `
-    <div class="funnel-row">
+    <div class="funnel-row" onclick="jumpToPipeline('${s}')" style="cursor:pointer" title="View ${s} contacts">
       <div class="funnel-label">${s}</div>
       <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.max(4,(counts[s]/max)*100)}%;background:${colors[s]}"></div></div>
       <div class="funnel-count">${counts[s]}</div>
@@ -555,7 +567,8 @@ function renderInf(){
   else if(infFilter==='Tier 2')data=data.filter(r=>parseFloat(r.Priority_Score)>=7&&parseFloat(r.Priority_Score)<8.5);
   else if(infFilter==='Prospect')data=data.filter(r=>getRecord('inf',r.Name).status==='Prospect');
   if(q)data=data.filter(r=>(r.Name+r.Category+r.Primary_Platform).toLowerCase().includes(q));
-  data.sort((a,b)=>parseFloat(b.Priority_Score)-parseFloat(a.Priority_Score));
+  data=applySortInf(data);
+  document.getElementById('nav-inf-count').textContent=data.length<INF_RAW.length?data.length+'/'+INF_RAW.length:INF_RAW.length;
   if(!data.length){document.getElementById('inf-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⭐</div><div class="empty-state-text">No influencers match this filter</div></div></td></tr>`;return;}
   document.getElementById('inf-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('inf',r.Name);
@@ -577,6 +590,8 @@ function renderWL(){
   else if(wlFilter==='Tier 2')data=data.filter(r=>r.Tier==='Tier 2');
   else if(wlFilter==='Prospect')data=data.filter(r=>getRecord('wl',r.Company).status==='Prospect');
   if(q)data=data.filter(r=>(r.Company+r.Headquarters+r.Contact_Email).toLowerCase().includes(q));
+  data=applySortWL(data);
+  document.getElementById('nav-wl-count').textContent=data.length<WL_RAW.length?data.length+'/'+WL_RAW.length:WL_RAW.length;
   if(!data.length){document.getElementById('wl-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-text">No white label contacts match this filter</div></div></td></tr>`;return;}
   document.getElementById('wl-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('wl',r.Company);
@@ -599,6 +614,8 @@ function renderNAD(){
   else if(nadFilter==='Tier 2')data=data.filter(r=>r.Tier==='Tier 2');
   else if(nadFilter==='Prospect')data=data.filter(r=>getRecord('nad',r.Company).status==='Prospect');
   if(q)data=data.filter(r=>(r.Company+r.Headquarters+(r.Market_Coverage||'')).toLowerCase().includes(q));
+  data=applySortNAD(data);
+  document.getElementById('nav-nad-count').textContent=data.length<NAD_RAW.length?data.length+'/'+NAD_RAW.length:NAD_RAW.length;
   if(!data.length){document.getElementById('nad-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🏥</div><div class="empty-state-text">No NAD dealers match this filter</div></div></td></tr>`;return;}
   document.getElementById('nad-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('nad',r.Company);
@@ -623,6 +640,7 @@ function renderAll(){
   if(allFilter!=='all'&&['Influencer','White Label','NAD Dealer'].includes(allFilter))all=all.filter(r=>r.type===allFilter);
   else if(allFilter!=='all')all=all.filter(r=>getRecord(r.typeKey,r.name).status===allFilter);
   if(q)all=all.filter(r=>(r.name+r.type).toLowerCase().includes(q));
+  all=applySortAll(all);
   const segColors={'Influencer':'var(--gold)','White Label':'var(--teal)','NAD Dealer':'#ce93d8'};
   if(!all.length){document.getElementById('all-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🔄</div><div class="empty-state-text">No contacts match this filter</div></div></td></tr>`;return;}
   document.getElementById('all-tbody').innerHTML=all.map(r=>{
@@ -700,6 +718,18 @@ function openDetail(type,name){
     <select class="detail-status-select" id="status-select">
       ${STATUSES.map(s=>`<option value="${s}" ${s===rec.status?'selected':''}>${s}</option>`).join('')}
     </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Next Action</div>
+        <input type="text" id="next-action-input" placeholder="e.g. Send proposal" value="${raw.Next_Action||''}"
+          style="background:var(--navy-light);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--white);font-size:12px;width:100%;outline:none;">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Due Date</div>
+        <input type="date" id="next-action-date-input" value="${raw.Next_Action_Date||''}"
+          style="background:var(--navy-light);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--white);font-size:12px;width:100%;outline:none;">
+      </div>
+    </div>
     <textarea class="detail-note-input" id="note-input" placeholder="Add a note (call made, email sent, meeting scheduled…)"></textarea>
     <button class="save-btn" onclick="saveFromPanel()">Save Update</button>
     ${noteLog}`;
@@ -720,9 +750,13 @@ function saveFromPanel(){
   renderAll();
   if(rowIndex){
     const today=new Date().toISOString().split('T')[0];
+    const nextAction=document.getElementById('next-action-input')?document.getElementById('next-action-input').value:'';
+    const nextActionDate=document.getElementById('next-action-date-input')?document.getElementById('next-action-date-input').value:'';
     const updates={'Pipeline Status':status};
     if(note&&note.trim()){updates['Last Contact Notes']=note.trim();updates['Last Contacted Date']=today;}
-  saveContactUpdate(rowIndex,updates);
+    if(nextAction.trim())updates['Next Action']=nextAction.trim();
+    if(nextActionDate)updates['Next Action Date']=nextActionDate;
+    saveContactUpdate(rowIndex,updates);
   }
   closeDetailPanel();
   showToast();
@@ -746,6 +780,99 @@ function showView(v,el){
   closeSidebar();
 }
 
+
+
+// ===================== SORTING =====================
+let infSort={key:'score',dir:'desc'}, wlSort={key:'tier',dir:'asc'}, nadSort={key:'tier',dir:'asc'}, allSort={key:'type',dir:'asc'};
+
+function setSortIndicator(prefix, key, dir){
+  ['score','name','reach','status','tier','hq','locations','type'].forEach(k=>{
+    const el=document.getElementById('sort-'+prefix+'-'+k);
+    if(el) el.className='';
+  });
+  const el=document.getElementById('sort-'+prefix+'-'+key);
+  if(el) el.className=dir==='asc'?'sort-asc':'sort-desc';
+}
+
+function sortInf(key){
+  if(infSort.key===key) infSort.dir=infSort.dir==='asc'?'desc':'asc'; else {infSort.key=key;infSort.dir='asc';}
+  setSortIndicator('inf',key,infSort.dir); renderInf();
+}
+function sortWL(key){
+  if(wlSort.key===key) wlSort.dir=wlSort.dir==='asc'?'desc':'asc'; else {wlSort.key=key;wlSort.dir='asc';}
+  setSortIndicator('wl',key,wlSort.dir); renderWL();
+}
+function sortNAD(key){
+  if(nadSort.key===key) nadSort.dir=nadSort.dir==='asc'?'desc':'asc'; else {nadSort.key=key;nadSort.dir='asc';}
+  setSortIndicator('nad',key,nadSort.dir); renderNAD();
+}
+function sortAll(key){
+  if(allSort.key===key) allSort.dir=allSort.dir==='asc'?'desc':'asc'; else {allSort.key=key;allSort.dir='asc';}
+  setSortIndicator('all',key,allSort.dir); renderAll();
+}
+
+function applySortInf(data){
+  const {key,dir}=infSort; const m=dir==='asc'?1:-1;
+  return data.sort((a,b)=>{
+    if(key==='score') return m*(parseFloat(b.Priority_Score)-parseFloat(a.Priority_Score))*-1;
+    if(key==='name') return m*(a.Name||'').localeCompare(b.Name||'');
+    if(key==='reach') return m*(a.Reach_Tier||'').localeCompare(b.Reach_Tier||'');
+    if(key==='status') return m*(getRecord('inf',a.Name).status||'').localeCompare(getRecord('inf',b.Name).status||'');
+    return 0;
+  });
+}
+function applySortWL(data){
+  const {key,dir}=wlSort; const m=dir==='asc'?1:-1;
+  return data.sort((a,b)=>{
+    if(key==='tier') return m*(a.Tier||'').localeCompare(b.Tier||'');
+    if(key==='name') return m*(a.Company||'').localeCompare(b.Company||'');
+    if(key==='hq') return m*(a.Headquarters||'').localeCompare(b.Headquarters||'');
+    if(key==='status') return m*(getRecord('wl',a.Company).status||'').localeCompare(getRecord('wl',b.Company).status||'');
+    return 0;
+  });
+}
+function applySortNAD(data){
+  const {key,dir}=nadSort; const m=dir==='asc'?1:-1;
+  return data.sort((a,b)=>{
+    if(key==='tier') return m*(a.Tier||'').localeCompare(b.Tier||'');
+    if(key==='name') return m*(a.Company||'').localeCompare(b.Company||'');
+    if(key==='hq') return m*(a.Headquarters||'').localeCompare(b.Headquarters||'');
+    if(key==='locations') return m*((parseInt(a.Location_Count)||0)-(parseInt(b.Location_Count)||0));
+    if(key==='status') return m*(getRecord('nad',a.Company).status||'').localeCompare(getRecord('nad',b.Company).status||'');
+    return 0;
+  });
+}
+function applySortAll(data){
+  const {key,dir}=allSort; const m=dir==='asc'?1:-1;
+  return data.sort((a,b)=>{
+    if(key==='type') return m*(a.type||'').localeCompare(b.type||'');
+    if(key==='name') return m*(a.name||'').localeCompare(b.name||'');
+    if(key==='tier') return m*(a.tier||'').localeCompare(b.tier||'');
+    if(key==='status') return m*(getRecord(a.typeKey,a.name).status||'').localeCompare(getRecord(b.typeKey,b.name).status||'');
+    return 0;
+  });
+}
+
+// ===================== FUNNEL NAV =====================
+function jumpToPipeline(status){
+  // Switch to pipeline view
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-pipeline').classList.add('active');
+  setBottomNav('pipeline');
+  // Set the filter
+  allFilter=status;
+  document.querySelectorAll('#view-pipeline .filter-btn').forEach(b=>b.classList.remove('active'));
+  // Find and activate matching button
+  document.querySelectorAll('#view-pipeline .filter-btn').forEach(b=>{
+    if(b.textContent.trim()===status)b.classList.add('active');
+  });
+  renderAll();
+  // Activate sidebar nav item
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    if(el.onclick&&el.onclick.toString().includes('pipeline'))el.classList.add('active');
+  });
+}
 
 // ===================== MOBILE =====================
 function toggleSidebar(){
