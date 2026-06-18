@@ -690,8 +690,6 @@ async function loadAndInit() {
   }
 }
 
-// Auto-start when DOM is ready
-
 // ===================== STATE =====================
 const STATUSES = ['New','Contacted','In-Progress','Proposal-Sent','Closed-Won','Nurture'];
 let state = {};
@@ -1040,12 +1038,19 @@ function showView(v) {
 }
 
 // ===================== INIT =====================
-document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
-document.getElementById('kpi-total').textContent = WL_RAW.length + INF_RAW.length + NAD_RAW.length;
-document.getElementById('stat-total').textContent = WL_RAW.length + INF_RAW.length + NAD_RAW.length;
-renderFunnel();
-renderActivityLog();
-updateStats();
+function init() {
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('kpi-total').textContent = ALL_CONTACTS.length;
+  document.getElementById('stat-total').textContent = ALL_CONTACTS.length;
+  document.getElementById('nav-inf-count').textContent = INF_RAW.length;
+  document.getElementById('nav-wl-count').textContent = WL_RAW.length;
+  document.getElementById('nav-nad-count').textContent = NAD_RAW.length;
+  renderFunnel();
+  renderActivityLog();
+  updateStats();
+}
+
+document.addEventListener('DOMContentLoaded', loadAndInit)
 </script>
 </body>
 </html>
