@@ -491,8 +491,7 @@
         <button class="filter-btn" onclick="filterAll(this,'NAD Dealer')">NAD Dealers</button>
         <button class="filter-btn" onclick="filterAll(this,'New')">New</button>
         <button class="filter-btn" onclick="filterAll(this,'Contacted')">Contacted</button>
-        <button class="filter-btn" onclick="filterAll(this,'Closed-Won')">Won</button>
-      </div>
+<button class="filter-btn" onclick="filterAll(this,'Active Partner')">Active Partner</button>      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -691,7 +690,7 @@ async function loadAndInit() {
 }
 
 // ===================== STATE =====================
-const STATUSES = ['New','Contacted','In-Progress','Proposal-Sent','Closed-Won','Nurture'];
+const STATUSES = ['Prospect','Contacted','In Discussion','Proposal Sent','Active Partner','On Hold','Declined'];
 let state = {};
 let activityLog = [];
 
@@ -700,7 +699,12 @@ function stateKey(type, name) { return `${type}::${name}`; }
 function getRecord(type, name) {
   const k = stateKey(type, name);
   if (!state[k]) {
-    state[k] = { status: 'New', notes: [], lastNote: '' };
+    // Use Pipeline_Status from Sheet data if available
+    const allArrays = { inf: INF_RAW, wl: WL_RAW, nad: NAD_RAW };
+    const arr = allArrays[type];
+    const raw = arr ? arr.find(c => (c.Name || c.Company) === name) : null;
+    const sheetStatus = raw?.Pipeline_Status || 'Prospect';
+    state[k] = { status: sheetStatus, notes: [], lastNote: raw?.Last_Notes || '' };
   }
   return state[k];
 }
@@ -739,8 +743,8 @@ function saveRecord(type, name, status, note) {
 // ===================== STATS =====================
 function updateStats() {
   const all = Object.values(state);
-  const active = all.filter(r => ['Contacted','In-Progress','Proposal-Sent'].includes(r.status)).length;
-  const won = all.filter(r => r.status === 'Closed-Won').length;
+const active = all.filter(r => ['Contacted','In Discussion','Proposal Sent'].includes(r.status)).length;
+const won = all.filter(r => r.status === 'Active Partner').length;
   const tier1 = [...WL_RAW.filter(r=>r.Tier==='Tier 1'), ...NAD_RAW.filter(r=>r.Tier==='Tier 1'), ...INF_RAW.filter(r=>parseFloat(r.Priority_Score)>=8.5)].length;
   document.getElementById('stat-active').textContent = active;
   document.getElementById('stat-won').textContent = won;
@@ -760,8 +764,8 @@ function renderFunnel() {
   STATUSES.forEach(s => counts[s] = 0);
   all.forEach(r => counts[r.status] = (counts[r.status]||0) + 1);
   const max = Math.max(...Object.values(counts), 1);
-  const colors = { 'New':'#4fc3f7','Contacted':'#c9a84c','In-Progress':'#ab47bc','Proposal-Sent':'#ff7043','Closed-Won':'#66bb6a','Nurture':'#8da0b3' };
-  const labels = { 'New':'New','Contacted':'Contacted','In-Progress':'In Progress','Proposal-Sent':'Proposal','Closed-Won':'Closed Won','Nurture':'Nurture' };
+  const colors = { 'Prospect':'#4fc3f7','Contacted':'#c9a84c','In Discussion':'#ab47bc','Proposal Sent':'#ff7043','Active Partner':'#66bb6a','On Hold':'#8da0b3','Declined':'#ef5350' };
+const labels = { 'Prospect':'Prospect','Contacted':'Contacted','In Discussion':'In Discussion','Proposal Sent':'Proposal Sent','Active Partner':'Active Partner','On Hold':'On Hold','Declined':'Declined' };
   const el = document.getElementById('funnel-chart');
   el.innerHTML = STATUSES.map(s => `
     <div class="funnel-row">
@@ -783,7 +787,7 @@ function renderActivityLog() {
   const typeLabels = { wl: '🏷️', inf: '⭐', nad: '🏥' };
   el.innerHTML = activityLog.slice(0,8).map(a => `
     <div class="activity-item">
-      <div class="activity-dot" style="background:${a.status==='Closed-Won'?'#66bb6a':a.status==='Contacted'?'#c9a84c':'#4fc3f7'}"></div>
+      <div class="activity-dot" style="background:${a.status==='Active Partner'?'#66bb6a':a.status==='Contacted'?'#c9a84c':a.status==='Declined'?'#ef5350':'#4fc3f7'}"></div>
       <div>
         <div class="activity-text">${typeLabels[a.type]||''} <span class="activity-name">${a.name}</span> — ${a.note}</div>
         <div class="activity-time">${a.time}</div>
@@ -1003,22 +1007,31 @@ function saveFromPanel() {
   if (!currentDetail) return;
   const status = document.getElementById('status-select').value;
   const note = document.getElementById('note-input').value;
+
+  // Find _rowIndex from the raw data
+  const allArrays = { inf: INF_RAW, wl: WL_RAW, nad: NAD_RAW };
+  const arr = allArrays[currentDetail.type];
+  const raw = arr ? arr.find(c => (c.Name || c.Company) === currentDetail.name) : null;
+  const rowIndex = raw ? raw._rowIndex : null;
+
   saveRecord(currentDetail.type, currentDetail.name, status, note);
   openDetail(currentDetail.type, currentDetail.name);
   // Re-render active table
   const views = { inf: renderInf, wl: renderWL, nad: renderNAD };
   if (views[currentDetail.type]) views[currentDetail.type]();
   renderAll();
+
   // ── Write back to Google Sheet ──
-  if (currentDetail._rowIndex) {
+  if (rowIndex) {
     const today = new Date().toISOString().split('T')[0];
     const updates = { 'Pipeline Status': status };
     if (note && note.trim()) {
       updates['Last Contact Notes'] = note.trim();
       updates['Last Contacted Date'] = today;
     }
-    saveContactUpdate(currentDetail._rowIndex, updates);
+    saveContactUpdate(rowIndex, updates);
   }
+}
 }
 
 function closeDetail(e) { if (e.target === document.getElementById('detail-overlay')) closeDetailPanel(); }
