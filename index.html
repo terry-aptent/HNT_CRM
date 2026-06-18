@@ -1069,8 +1069,7 @@ function exportCSV(type){
 
   const csvContent = [headers, ...data].map(row =>
     row.map(cell => '"' + String(cell||'').replace(/"/g,'""') + '"').join(',')
-  ).join('
-');
+).join('\n');
 
   const blob = new Blob([csvContent], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
