@@ -129,17 +129,116 @@
   .empty { padding: 60px; text-align: center; color: var(--muted); }
   .fade-in { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-  @media (max-width: 1000px) { .kpi-row { grid-template-columns: repeat(2,1fr); } .dash-cols { grid-template-columns: 1fr; } }
+
+  /* LOADING SPINNER */
+  .spinner-overlay { display:none; position:fixed; inset:0; background:rgba(13,27,42,0.85); z-index:500; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+  .spinner-overlay.active { display:flex; }
+  .spinner { width:40px; height:40px; border:3px solid rgba(0,201,177,0.2); border-top-color:var(--teal); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spinner-text { color:var(--muted); font-size:13px; }
+
+  /* SAVE TOAST */
+  .save-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#1e3450; border:1px solid var(--teal); color:var(--teal); padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; z-index:999; transition:transform 0.3s ease; white-space:nowrap; }
+  .save-toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; color:var(--muted); gap:12px; }
+  .empty-state-icon { font-size:36px; opacity:0.4; }
+  .empty-state-text { font-size:14px; }
+
+  /* HAMBURGER */
+  .hamburger { display:none; background:none; border:none; color:var(--white); font-size:22px; cursor:pointer; padding:4px; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:150; }
+  .sidebar-overlay.open { display:block; }
+
+  /* TABLET (max 1000px) */
+  @media (max-width:1000px) {
+    .kpi-row { grid-template-columns:repeat(2,1fr); }
+    .dash-cols { grid-template-columns:1fr; }
+    .top-stats { gap:16px; }
+    .top-stat-val { font-size:15px; }
+  }
+
+  /* MOBILE (max 700px) */
+  @media (max-width:700px) {
+    .hamburger { display:block; }
+    .top-bar { padding:0 16px; }
+    .logo-sub { display:none; }
+    .top-stats { gap:12px; }
+    .top-stat-val { font-size:14px; }
+    .top-stat-lbl { font-size:9px; }
+
+    /* Sidebar slides in from left on mobile */
+    .sidebar {
+      position:fixed; left:-220px; top:60px; height:calc(100vh - 60px);
+      width:220px; z-index:160; transition:left 0.25s ease;
+    }
+    .sidebar.open { left:0; }
+
+    .layout { height:calc(100vh - 60px); }
+    .main { width:100%; }
+
+    /* KPI cards 2 columns on mobile */
+    .kpi-row { grid-template-columns:repeat(2,1fr); gap:10px; padding:14px 16px; }
+    .kpi-val { font-size:24px; }
+    .kpi-lbl { font-size:11px; }
+    .kpi-sub { display:none; }
+    .dash-cols { grid-template-columns:1fr; padding:0 16px 16px; gap:10px; }
+    .dash-header { padding:16px 16px 0; }
+    .dash-title { font-size:20px; }
+
+    /* Table header wraps nicely */
+    .table-header { padding:14px 16px 10px; gap:8px; }
+    .table-title { font-size:18px; width:100%; margin-bottom:2px; }
+    .search-box { width:100%; }
+    .filter-btn { font-size:11px; padding:5px 10px; }
+
+    /* Tables scroll horizontally */
+    .table-wrap { padding:0 0 80px; overflow-x:auto; }
+    table { min-width:500px; }
+    th, td { padding:8px 10px; }
+
+    /* Detail panel full width on mobile */
+    .detail-panel { width:100vw; }
+
+    /* Bottom nav for mobile */
+    .bottom-nav {
+      display:flex; position:fixed; bottom:0; left:0; right:0;
+      background:#0d1b2a; border-top:1px solid var(--border);
+      z-index:140; height:60px;
+    }
+    .bottom-nav-item {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:2px; cursor:pointer;
+      color:var(--muted); font-size:9px; text-transform:uppercase;
+      letter-spacing:0.5px; transition:color 0.2s;
+    }
+    .bottom-nav-item.active { color:var(--teal); }
+    .bottom-nav-item .nav-icon { font-size:18px; width:auto; }
+  }
+
+  /* Hide bottom nav on desktop */
+  @media (min-width:701px) { .bottom-nav { display:none !important; } }
 </style>
 </head>
 <body>
 
+<div class="spinner-overlay" id="spinner-overlay">
+  <div class="spinner"></div>
+  <div class="spinner-text">Loading contacts…</div>
+</div>
+<div class="save-toast" id="save-toast">✓ Saved</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <div class="top-bar">
-  <div class="logo">
-    <div class="logo-mark">H</div>
-    <div>
-      <div class="logo-text">HaloNutraTherapy</div>
-      <div class="logo-sub">Sales CRM</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="logo">
+      <div class="logo-mark">H</div>
+      <div>
+        <div class="logo-text">HaloNutraTherapy</div>
+        <div class="logo-sub">Sales CRM</div>
+      </div>
     </div>
   </div>
   <div class="top-stats">
@@ -150,7 +249,7 @@
 </div>
 
 <div class="layout">
-  <nav class="sidebar">
+  <nav class="sidebar" id="sidebar">
     <div class="nav-section">
       <div class="nav-section-label">Overview</div>
       <div class="nav-item active" onclick="showView('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
@@ -457,6 +556,7 @@ function renderInf(){
   else if(infFilter==='Prospect')data=data.filter(r=>getRecord('inf',r.Name).status==='Prospect');
   if(q)data=data.filter(r=>(r.Name+r.Category+r.Primary_Platform).toLowerCase().includes(q));
   data.sort((a,b)=>parseFloat(b.Priority_Score)-parseFloat(a.Priority_Score));
+  if(!data.length){document.getElementById('inf-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⭐</div><div class="empty-state-text">No influencers match this filter</div></div></td></tr>`;return;}
   document.getElementById('inf-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('inf',r.Name);
     return`<tr onclick="openDetail('inf','${r.Name.replace(/'/g,"\\'")}')">
@@ -477,6 +577,7 @@ function renderWL(){
   else if(wlFilter==='Tier 2')data=data.filter(r=>r.Tier==='Tier 2');
   else if(wlFilter==='Prospect')data=data.filter(r=>getRecord('wl',r.Company).status==='Prospect');
   if(q)data=data.filter(r=>(r.Company+r.Headquarters+r.Contact_Email).toLowerCase().includes(q));
+  if(!data.length){document.getElementById('wl-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-text">No white label contacts match this filter</div></div></td></tr>`;return;}
   document.getElementById('wl-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('wl',r.Company);
     const email=r.Contact_Email&&r.Contact_Email!=='Contact Page'?`<a href="mailto:${r.Contact_Email}" onclick="event.stopPropagation()" style="color:var(--teal);font-size:11px">${r.Contact_Email}</a>`:`<span style="color:var(--muted);font-size:11px">—</span>`;
@@ -498,6 +599,7 @@ function renderNAD(){
   else if(nadFilter==='Tier 2')data=data.filter(r=>r.Tier==='Tier 2');
   else if(nadFilter==='Prospect')data=data.filter(r=>getRecord('nad',r.Company).status==='Prospect');
   if(q)data=data.filter(r=>(r.Company+r.Headquarters+(r.Market_Coverage||'')).toLowerCase().includes(q));
+  if(!data.length){document.getElementById('nad-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🏥</div><div class="empty-state-text">No NAD dealers match this filter</div></div></td></tr>`;return;}
   document.getElementById('nad-tbody').innerHTML=data.map(r=>{
     const rec=getRecord('nad',r.Company);
     return`<tr onclick="openDetail('nad','${r.Company.replace(/'/g,"\\'")}')">
@@ -522,6 +624,7 @@ function renderAll(){
   else if(allFilter!=='all')all=all.filter(r=>getRecord(r.typeKey,r.name).status===allFilter);
   if(q)all=all.filter(r=>(r.name+r.type).toLowerCase().includes(q));
   const segColors={'Influencer':'var(--gold)','White Label':'var(--teal)','NAD Dealer':'#ce93d8'};
+  if(!all.length){document.getElementById('all-tbody').innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🔄</div><div class="empty-state-text">No contacts match this filter</div></div></td></tr>`;return;}
   document.getElementById('all-tbody').innerHTML=all.map(r=>{
     const rec=getRecord(r.typeKey,r.name);
     const lastNote=rec.notes[0]?`<span style="color:var(--muted);font-size:11px">${rec.notes[0].text.substring(0,40)}${rec.notes[0].text.length>40?'…':''}</span>`:`<span style="color:var(--muted);font-size:11px">—</span>`;
@@ -611,6 +714,7 @@ function saveFromPanel(){
   const raw=arr?arr.find(c=>(c.Name||c.Company)===currentDetail.name):null;
   const rowIndex=raw?raw._rowIndex:null;
   saveRecord(currentDetail.type,currentDetail.name,status,note);
+  openDetail(currentDetail.type,currentDetail.name);
   const views={inf:renderInf,wl:renderWL,nad:renderNAD};
   if(views[currentDetail.type])views[currentDetail.type]();
   renderAll();
@@ -618,12 +722,13 @@ function saveFromPanel(){
     const today=new Date().toISOString().split('T')[0];
     const updates={'Pipeline Status':status};
     if(note&&note.trim()){updates['Last Contact Notes']=note.trim();updates['Last Contacted Date']=today;}
-    saveContactUpdate(rowIndex,updates);
+  saveContactUpdate(rowIndex,updates);
   }
   closeDetailPanel();
+  showToast();
 }
 
-function closeDetail(e){if(e.target===document.getElementById('detail-overlay'))closeDetailPanel();}
+function closeDe(e){if(e.target===document.getElementById('detail-overlay'))closeDetailPanel();}
 function closeDetailPanel(){document.getElementById('detail-overlay').classList.remove('open');}
 
 // ===================== NAV =====================
@@ -637,11 +742,40 @@ function showView(v,el){
   else if(v==='dealers')renderNAD();
   else if(v==='pipeline')renderAll();
   else if(v==='dashboard'){renderFunnel();renderActivityLog();}
+  setBottomNav(v);
+  closeSidebar();
+}
+
+
+// ===================== MOBILE =====================
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  const o=document.getElementById('sidebar-overlay');
+  s.classList.toggle('open');
+  o.classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+function setBottomNav(v){
+  document.querySelectorAll('.bottom-nav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('bn-'+v);
+  if(el)el.classList.add('active');
+}
+
+// ===================== TOAST =====================
+function showToast(){
+  const t=document.getElementById('save-toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
 }
 
 // ===================== INIT =====================
 async function init(){
+  document.getElementById('spinner-overlay').classList.add('active');
   await loadContactsFromSheet();
+  document.getElementById('spinner-overlay').classList.remove('active');
   document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('kpi-total').textContent=ALL_CONTACTS.length;
   document.getElementById('stat-total').textContent=ALL_CONTACTS.length;
@@ -655,5 +789,14 @@ async function init(){
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard',null);setBottomNav('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+  <div class="bottom-nav-item" id="bn-influencers" onclick="showView('influencers',null);setBottomNav('influencers')"><span class="nav-icon">⭐</span>Influencers</div>
+  <div class="bottom-nav-item" id="bn-whitelabel" onclick="showView('whitelabel',null);setBottomNav('whitelabel')"><span class="nav-icon">🏷️</span>White Label</div>
+  <div class="bottom-nav-item" id="bn-dealers" onclick="showView('dealers',null);setBottomNav('dealers')"><span class="nav-icon">🏥</span>Dealers</div>
+  <div class="bottom-nav-item" id="bn-pipeline" onclick="showView('pipeline',null);setBottomNav('pipeline')"><span class="nav-icon">🔄</span>Pipeline</div>
+</nav>
 </body>
 </html>
