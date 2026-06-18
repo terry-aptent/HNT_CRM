@@ -43,7 +43,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
-        range: `'${SHEET_NAME}'!A:AH`,
+        range: `${SHEET_NAME}!A:AH`,
       })
 
       const [headers, ...rows] = response.data.values ?? []
@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
       // Get headers to find column positions
       const headerRes = await sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
-        range: `'${SHEET_NAME}'!1:1`,
+        range: `${SHEET_NAME}!A:AH`,
       })
       const headers = headerRes.data.values[0]
 
@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
         if (colIndex === -1) continue // skip unknown columns
         const colLetter = indexToLetter(colIndex + 1)
         data.push({
-          range: `'${SHEET_NAME}'!${colLetter}${rowIndex}`,
+          range: `${SHEET_NAME}!${colLetter}${rowIndex}`,
           values: [[value]],
         })
       }
