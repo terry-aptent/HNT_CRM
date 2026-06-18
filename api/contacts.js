@@ -3,7 +3,6 @@ const { google } = require('googleapis')
 const SHEET_ID = '1JVNoNZoXqgytWPOJNiSK3QTyd8fSBiN2YHIGCis_J9w'
 const SHEET_NAME = 'HNT-CRM Master'
 
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, OPTIONS')
