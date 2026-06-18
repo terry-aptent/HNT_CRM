@@ -9,7 +9,7 @@
 
 const { google } = require('googleapis')
 
-const SHEET_ID = '1QgTAGOQARxwyxCQyZkzwCiMtZYNzJGGp'
+const SHEET_ID = '1JVNoNZoXqgytWPOJNiSK3QTyd8fSBiN2YHIGCis_J9w/edit?gid=966299746#gid=966299746'
 const SHEET_NAME = 'HNT-CRM Master'
 
 // Column header → JS key mapping (matches your sheet columns)
