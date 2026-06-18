@@ -1,0 +1,165 @@
+# HaloNutraTherapy CRM — User Guide
+
+**Live app:** [hnt-crm.vercel.app](https://hnt-crm.vercel.app)  
+**Backend:** Google Sheet (HNT-CRM Master)  
+**Last updated:** June 2026
+
+---
+
+## What Is This?
+
+The HNT-CRM is a sales and partnership tracking tool for HaloNutraTherapy. It gives you a single place to manage outreach across three contact segments:
+
+- **Influencers** — podcasters, physicians, and content creators ranked by priority score, NAD alignment, and access
+- **White Label** — supplement and wellness brands that could carry or co-market HNT products
+- **NAD Dealers** — IV clinics, longevity centers, and wellness chains that administer NAD protocols
+
+Everything you do in the app — updating a status, logging a note, setting a next action — saves automatically to the Google Sheet, so the data is always in sync.
+
+---
+
+## Getting Started
+
+Visit [hnt-crm.vercel.app](https://hnt-crm.vercel.app) in any browser. The app loads your contacts directly from Google Sheets. All 117 contacts will appear within a second or two.
+
+---
+
+## Navigating the App
+
+### Sidebar (desktop) / Bottom bar (mobile)
+Use the left sidebar on desktop or the icon bar at the bottom on mobile to switch between views:
+
+| Icon | View | What it shows |
+|------|------|--------------|
+| 📊 | Dashboard | KPI summary, pipeline funnel, recent activity |
+| ⭐ | Influencers | All influencer contacts sorted by priority score |
+| 🏷️ | White Label | White label partner opportunities |
+| 🏥 | NAD Dealers | IV clinics and NAD wellness centers |
+| 🔄 | All Contacts | Every contact in one combined pipeline view |
+
+On mobile, tap the **☰ hamburger menu** in the top left to open the full sidebar.
+
+---
+
+## Dashboard
+
+The dashboard gives you a quick read on where your pipeline stands.
+
+**KPI Cards**
+- **Total Contacts** — all contacts across all three segments
+- **Tier 1 Contacts** — highest priority targets (score ≥ 8.5 for influencers, Tier 1 for dealers/white label)
+- **Active Outreach** — contacts with status: Contacted, In Discussion, or Proposal Sent
+- **Active Partners** — contacts marked as Active Partner
+
+**Pipeline by Stage**
+The funnel chart shows how many contacts are at each stage. **Click any bar** to jump directly to the All Contacts view filtered to that stage.
+
+**Recent Activity**
+Shows the last 10 status updates and notes logged this session. Use the date range buttons — **7 days / 30 days / 90 days / All time** — above the funnel to adjust the activity window.
+
+---
+
+## Working with Contacts
+
+### Searching and Filtering
+Each segment view has a search box and filter buttons at the top:
+- **Search** — type any part of a name, company, location, or platform
+- **Filter buttons** — All / Tier 1 / Tier 2 / Not Contacted (Prospect)
+- The sidebar badge updates dynamically — when you filter, it shows `12/46` so you always know how many are visible vs total
+
+### Sorting Columns
+Click any **underlined column header** to sort by that column. Click again to reverse the sort direction. A ↑ or ↓ arrow shows the active sort. You can sort by name, tier, score, status, location count, and more.
+
+### Opening a Contact
+Click any row to open the contact detail panel on the right. It shows:
+- All key data for that contact (scores, links, notes from research)
+- Their current pipeline status and activity log
+
+---
+
+## Updating a Contact
+
+1. Click a contact row to open the detail panel
+2. Change the **Pipeline Status** dropdown to the new stage
+3. Fill in **Next Action** — what needs to happen next (e.g. "Send proposal")
+4. Set a **Due Date** for that action
+5. Add a **note** in the text box describing what happened (call, email, meeting, etc.)
+6. Hit **Save Update**
+
+The panel closes, a ✓ Saved confirmation appears at the bottom of the screen, and the update writes back to the Google Sheet automatically.
+
+---
+
+## Pipeline Status Values
+
+| Status | Meaning |
+|--------|---------|
+| **Prospect** | Identified but not yet contacted |
+| **Contacted** | Initial outreach made |
+| **In Discussion** | Active conversation underway |
+| **Proposal Sent** | Formal proposal or partnership terms shared |
+| **Active Partner** | Partnership confirmed and active |
+| **On Hold** | Paused — revisit later |
+| **Declined** | Not interested or not a fit |
+
+---
+
+## Adding a New Contact
+
+1. Navigate to the relevant segment (Influencers, White Label, or NAD Dealers)
+2. Click the **+ Add** button in the top right of the table
+3. Fill in the contact details — the form adapts based on contact type:
+   - Influencers: name, category, platform, score, Instagram, website
+   - White Label / NAD Dealers: company, tier, HQ, website, contact email
+4. Set an initial Pipeline Status (defaults to Prospect)
+5. Click **Add Contact**
+
+The new contact saves to the Google Sheet and appears in the table immediately.
+
+---
+
+## Exporting Contacts
+
+Each segment table has an **⬇ Export** button that downloads the current view as a `.csv` file — including pipeline status, last notes, and next actions.
+
+The **All Contacts** (Pipeline) view has an **⬇ Export All** button that exports every contact across all three segments in one file.
+
+Exported files are named with today's date, e.g. `HNT-Influencers-2026-06-18.csv`. You can open them in Excel or Google Sheets.
+
+---
+
+## The Google Sheet
+
+The CRM reads from and writes to the **HNT-CRM Master** Google Sheet. You can open it directly to:
+- View all contacts in spreadsheet format
+- Bulk edit multiple contacts at once
+- Filter or sort using Google Sheets tools
+
+Any changes made directly in the Sheet will appear in the CRM the next time you reload the page.
+
+**CRM tracking columns in the Sheet:**
+- Pipeline Status
+- Next Action
+- Next Action Date
+- Assigned Rep
+- Last Contacted Date
+- Last Contact Notes
+- Date Added
+
+---
+
+## Tips
+
+- **Reload to sync** — if someone else updated the Sheet directly, reload the page to pull the latest data
+- **Mobile friendly** — the app works on phones and tablets; use the bottom nav bar to switch views and the ☰ menu to access the full sidebar
+- **Filters and search stack** — filter to Tier 1 first, then search within that filtered list
+- **Funnel is clickable** — tap any bar on the dashboard to jump to that filtered pipeline view
+- **Sort is persistent** — the sort direction stays active while you search and filter
+- **Export respects filters** — if you filter to Tier 1 before exporting, only Tier 1 contacts download
+- **✓ Saved toast** — after hitting Save Update, a green confirmation appears at the bottom confirming the Sheet was updated
+
+---
+
+## Need Help?
+
+Contact Terry Aptent for technical support or to request new features.
