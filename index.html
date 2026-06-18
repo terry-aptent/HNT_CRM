@@ -136,6 +136,43 @@
   .sort-asc::after { content:' ↑'; color:var(--teal); }
   .sort-desc::after { content:' ↓'; color:var(--teal); }
 
+
+  /* ADD CONTACT MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#111f30; border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; animation:slideUp 0.25s ease; }
+  @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .modal-title { font-family:'DM Serif Display',serif; font-size:20px; margin-bottom:4px; }
+  .modal-sub { color:var(--muted); font-size:12px; margin-bottom:20px; }
+  .modal-close { float:right; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; margin-top:-4px; }
+  .modal-close:hover { color:var(--white); }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-group { display:flex; flex-direction:column; gap:4px; }
+  .form-group.full { grid-column:1/-1; }
+  .form-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .form-input { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--white); font-size:13px; outline:none; width:100%; }
+  .form-input:focus { border-color:var(--teal); }
+  .form-select { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--white); font-size:13px; outline:none; width:100%; cursor:pointer; }
+  .form-textarea { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--white); font-size:13px; outline:none; width:100%; resize:none; height:70px; }
+  .form-textarea:focus { border-color:var(--teal); }
+  .modal-actions { display:flex; gap:10px; margin-top:20px; }
+  .modal-btn-cancel { flex:1; background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--muted); font-size:13px; cursor:pointer; }
+  .modal-btn-save { flex:2; background:var(--teal); border:none; border-radius:8px; padding:10px; color:var(--navy); font-size:13px; font-weight:600; cursor:pointer; }
+  .modal-btn-save:hover { background:var(--teal-dim); }
+  @media (max-width:700px) { .form-grid { grid-template-columns:1fr; } }
+
+  /* EXPORT BUTTON */
+  .export-btn { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--muted); font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s; }
+  .export-btn:hover { border-color:var(--teal); color:var(--teal); }
+
+  /* DASHBOARD DATE RANGE */
+  .dash-controls { display:flex; align-items:center; gap:10px; padding:0 28px 4px; flex-wrap:wrap; }
+  .date-range-label { font-size:11px; color:var(--muted); }
+  .date-input { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:5px 10px; color:var(--white); font-size:12px; outline:none; cursor:pointer; }
+  .date-input:focus { border-color:var(--teal); }
+  .date-range-btn { background:var(--navy-light); border:1px solid var(--border); border-radius:8px; padding:5px 12px; color:var(--muted); font-size:11px; cursor:pointer; transition:all 0.2s; }
+  .date-range-btn:hover, .date-range-btn.active { border-color:var(--teal); color:var(--teal); }
+  .activity-count { font-size:11px; color:var(--muted); margin-left:auto; }
   /* LOADING SPINNER */
   .spinner-overlay { display:none; position:fixed; inset:0; background:rgba(13,27,42,0.85); z-index:500; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
   .spinner-overlay.active { display:flex; }
@@ -284,6 +321,13 @@
         <div class="kpi-card purple"><div class="kpi-val" id="kpi-active">0</div><div class="kpi-lbl">Active Outreach</div><div class="kpi-sub">Contacted or in progress</div></div>
         <div class="kpi-card green"><div class="kpi-val" id="kpi-won">0</div><div class="kpi-lbl">Active Partners</div><div class="kpi-sub">Partnerships secured</div></div>
       </div>
+      <div class="dash-controls">
+        <span class="date-range-label">Activity since:</span>
+        <button class="date-range-btn active" id="dr-7" onclick="setDateRange(7,this)">7 days</button>
+        <button class="date-range-btn" id="dr-30" onclick="setDateRange(30,this)">30 days</button>
+        <button class="date-range-btn" id="dr-90" onclick="setDateRange(90,this)">90 days</button>
+        <button class="date-range-btn" id="dr-all" onclick="setDateRange(0,this)">All time</button>
+      </div>
       <div class="dash-cols">
         <div class="dash-card">
           <div class="dash-card-header"><div class="dash-card-title">Pipeline by Stage</div></div>
@@ -304,6 +348,8 @@
         <button class="filter-btn" onclick="filterInf(this,'Tier 1')">Tier 1</button>
         <button class="filter-btn" onclick="filterInf(this,'Tier 2')">Tier 2</button>
         <button class="filter-btn" onclick="filterInf(this,'Prospect')">Not Contacted</button>
+        <button class="export-btn" onclick="exportCSV('inf')" style="margin-left:auto">⬇ Export</button>
+        <button class="save-btn" style="width:auto;padding:7px 16px" onclick="openAddContact('Influencer')">+ Add</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr><th onclick="sortInf('score')" class="sortable">Score <span id="sort-inf-score"></span></th><th onclick="sortInf('name')" class="sortable">Name <span id="sort-inf-name"></span></th><th>Category</th><th>Platform</th><th onclick="sortInf('reach')" class="sortable">Reach <span id="sort-inf-reach"></span></th><th onclick="sortInf('status')" class="sortable">Status <span id="sort-inf-status"></span></th><th>Action</th></tr></thead>
@@ -319,6 +365,8 @@
         <button class="filter-btn" onclick="filterWL(this,'Tier 1')">Tier 1</button>
         <button class="filter-btn" onclick="filterWL(this,'Tier 2')">Tier 2</button>
         <button class="filter-btn" onclick="filterWL(this,'Prospect')">Not Contacted</button>
+        <button class="export-btn" onclick="exportCSV('wl')" style="margin-left:auto">⬇ Export</button>
+        <button class="save-btn" style="width:auto;padding:7px 16px" onclick="openAddContact('White Label')">+ Add</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr><th onclick="sortWL('tier')" class="sortable">Tier <span id="sort-wl-tier"></span></th><th onclick="sortWL('name')" class="sortable">Company <span id="sort-wl-name"></span></th><th onclick="sortWL('hq')" class="sortable">HQ <span id="sort-wl-hq"></span></th><th>Monthly Clients</th><th>Contact</th><th onclick="sortWL('status')" class="sortable">Status <span id="sort-wl-status"></span></th><th>Action</th></tr></thead>
@@ -334,6 +382,8 @@
         <button class="filter-btn" onclick="filterNAD(this,'Tier 1')">Tier 1</button>
         <button class="filter-btn" onclick="filterNAD(this,'Tier 2')">Tier 2</button>
         <button class="filter-btn" onclick="filterNAD(this,'Prospect')">Not Contacted</button>
+        <button class="export-btn" onclick="exportCSV('nad')" style="margin-left:auto">⬇ Export</button>
+        <button class="save-btn" style="width:auto;padding:7px 16px" onclick="openAddContact('NAD Dealer')">+ Add</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr><th onclick="sortNAD('tier')" class="sortable">Tier <span id="sort-nad-tier"></span></th><th onclick="sortNAD('name')" class="sortable">Company <span id="sort-nad-name"></span></th><th onclick="sortNAD('hq')" class="sortable">HQ <span id="sort-nad-hq"></span></th><th onclick="sortNAD('locations')" class="sortable">Locations <span id="sort-nad-locations"></span></th><th>Monthly Clients</th><th onclick="sortNAD('status')" class="sortable">Status <span id="sort-nad-status"></span></th><th>Action</th></tr></thead>
@@ -352,6 +402,7 @@
         <button class="filter-btn" onclick="filterAll(this,'Prospect')">Prospect</button>
         <button class="filter-btn" onclick="filterAll(this,'Contacted')">Contacted</button>
         <button class="filter-btn" onclick="filterAll(this,'Active Partner')">Active Partner</button>
+        <button class="export-btn" onclick="exportCSV('all')" style="margin-left:auto">⬇ Export All</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr><th onclick="sortAll('type')" class="sortable">Segment <span id="sort-all-type"></span></th><th onclick="sortAll('name')" class="sortable">Name / Company <span id="sort-all-name"></span></th><th onclick="sortAll('tier')" class="sortable">Tier / Score <span id="sort-all-tier"></span></th><th>Contact</th><th onclick="sortAll('status')" class="sortable">Status <span id="sort-all-status"></span></th><th>Last Note</th><th>Action</th></tr></thead>
@@ -538,12 +589,23 @@ function renderFunnel() {
 
 function renderActivityLog() {
   const el = document.getElementById('activity-log');
-  if (!activityLog.length) { el.innerHTML = '<div class="empty" style="padding:20px;font-size:12px;">No activity yet.</div>'; return; }
+  // Filter by date range — activityLog items have a 'date' field when from Sheet
+  let log = activityLog;
+  if(dashDateDays > 0){
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - dashDateDays);
+    // Session activity always shows; Sheet-loaded activity filtered by date
+    log = activityLog.filter(a => !a.isoDate || new Date(a.isoDate) >= cutoff);
+  }
+  if(!log.length){
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No activity in this date range</div></div>`;
+    return;
+  }
   const icons = { wl:'🏷️', inf:'⭐', nad:'🏥' };
-  el.innerHTML = activityLog.slice(0,8).map(a => `
+  el.innerHTML = log.slice(0,10).map(a => `
     <div class="activity-item">
       <div class="activity-dot" style="background:${ a.status==='Active Partner'?'#66bb6a':a.status==='Contacted'?'#c9a84c':a.status==='Declined'?'#ef5350':'#4fc3f7'}"></div>
-      <div><div class="activity-text">${icons[a.type]||''} <span class="activity-name">${a.name}</span> — ${a.note}</div><div class="activity-time">${a.time}</div></div>
+      <div><div class="activity-text">${icons[a.type]||''} <span class="activity-name">${a.name}</span> — ${a.note}</div><div class="activity-time">${a.isoDate||a.time}</div></div>
     </div>`).join('');
 }
 
@@ -874,6 +936,163 @@ function jumpToPipeline(status){
   });
 }
 
+
+// ===================== ADD CONTACT =====================
+function openAddContact(type){
+  document.getElementById('ac-type').value = type;
+  document.getElementById('ac-name').value = '';
+  document.getElementById('ac-website').value = '';
+  document.getElementById('ac-contact').value = '';
+  document.getElementById('ac-category').value = '';
+  document.getElementById('ac-hq').value = '';
+  document.getElementById('ac-tier').value = '';
+  document.getElementById('ac-score').value = '';
+  document.getElementById('ac-platform').value = '';
+  document.getElementById('ac-instagram').value = '';
+  document.getElementById('ac-protocol').value = '';
+  document.getElementById('ac-locations').value = '';
+  document.getElementById('ac-notes').value = '';
+  document.getElementById('ac-status').value = 'Prospect';
+  updateContactForm();
+  document.getElementById('add-contact-modal').classList.add('open');
+}
+
+function closeAddContact(e){
+  if(e.target === document.getElementById('add-contact-modal')){
+    document.getElementById('add-contact-modal').classList.remove('open');
+  }
+}
+
+function updateContactForm(){
+  const type = document.getElementById('ac-type').value;
+  const isInf = type === 'Influencer';
+  const isNAD = type === 'NAD Dealer';
+  document.getElementById('ac-tier-group').style.display = isInf ? 'none' : 'flex';
+  document.getElementById('ac-score-group').style.display = isInf ? 'flex' : 'none';
+  document.getElementById('ac-cat-group').style.display = isInf ? 'flex' : 'none';
+  document.getElementById('ac-platform-group').style.display = isInf ? 'flex' : 'none';
+  document.getElementById('ac-instagram-group').style.display = isInf ? 'flex' : 'none';
+  document.getElementById('ac-protocol-group').style.display = isNAD ? 'flex' : 'none';
+  document.getElementById('ac-locations-group').style.display = isNAD ? 'flex' : 'none';
+}
+
+async function submitAddContact(){
+  const type = document.getElementById('ac-type').value;
+  const name = document.getElementById('ac-name').value.trim();
+  if(!name){ alert('Please enter a name or company.'); return; }
+
+  const btn = document.querySelector('.modal-btn-save');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  const today = new Date().toISOString().split('T')[0];
+  const newContact = {
+    'Contact Type': type,
+    'Contact Name': name,
+    'Website': document.getElementById('ac-website').value.trim(),
+    'Contact / Booking': document.getElementById('ac-contact').value.trim(),
+    'Headquarters': document.getElementById('ac-hq').value.trim(),
+    'Notes': document.getElementById('ac-notes').value.trim(),
+    'Pipeline Status': document.getElementById('ac-status').value,
+    'Date Added': today,
+  };
+
+  if(type === 'Influencer'){
+    newContact['Category'] = document.getElementById('ac-category').value.trim();
+    newContact['Primary Platform'] = document.getElementById('ac-platform').value.trim();
+    newContact['Instagram'] = document.getElementById('ac-instagram').value.trim();
+    newContact['Priority Score'] = document.getElementById('ac-score').value;
+  } else {
+    newContact['Tier'] = document.getElementById('ac-tier').value;
+  }
+  if(type === 'NAD Dealer'){
+    newContact['NAD Protocol'] = document.getElementById('ac-protocol').value.trim();
+    newContact['Location Count'] = document.getElementById('ac-locations').value;
+  }
+
+  try {
+    const res = await fetch('/api/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contact: newContact }),
+    });
+    if(!res.ok) throw new Error('Save failed');
+
+    // Add to local arrays so UI updates immediately
+    if(type === 'Influencer'){
+      INF_RAW.push({ _rowIndex: ALL_CONTACTS.length + 2, Name: name, Category: newContact['Category'], Primary_Platform: newContact['Primary Platform'], Website: newContact['Website'], Contact_Booking: newContact['Contact / Booking'], Instagram: newContact['Instagram'], Priority_Score: newContact['Priority Score']||'', Reach_Tier:'', NAD_Alignment:0, Device_Fit:0, Access_Score:0, Conference_Speaker:'', Audience_Type:'', Best_Partnership:'', Est_Sponsorship_Cost:'', Practical_Notes: newContact['Notes'], Source_URL:'', Pipeline_Status: newContact['Pipeline Status'], Last_Notes:'', Last_Contacted:'', Next_Action:'', Next_Action_Date:'' });
+    } else if(type === 'White Label'){
+      WL_RAW.push({ _rowIndex: ALL_CONTACTS.length + 2, Tier: newContact['Tier'], Company: name, Website: newContact['Website'], Contact_Email: newContact['Contact / Booking'], Headquarters: newContact['Headquarters'], Est_Monthly_Clients:'', Device_Compatibility:'', Notes: newContact['Notes'], Pipeline_Status: newContact['Pipeline Status'], Last_Notes:'', Last_Contacted:'', Next_Action:'', Next_Action_Date:'' });
+    } else {
+      NAD_RAW.push({ _rowIndex: ALL_CONTACTS.length + 2, Tier: newContact['Tier'], Company: name, NAD_Protocol: newContact['NAD Protocol']||'', Website: newContact['Website'], Contact_Email: newContact['Contact / Booking'], Headquarters: newContact['Headquarters'], Location_Count: newContact['Location Count']||'', Market_Coverage:'', Est_Monthly_Clients:'', Device_Compatibility:'', Notes: newContact['Notes'], Pipeline_Status: newContact['Pipeline Status'], Last_Notes:'', Last_Contacted:'', Next_Action:'', Next_Action_Date:'' });
+    }
+
+    document.getElementById('add-contact-modal').classList.remove('open');
+    showToast();
+    renderInf(); renderWL(); renderNAD(); renderAll(); updateStats();
+    document.getElementById('stat-total').textContent = INF_RAW.length + WL_RAW.length + NAD_RAW.length;
+    document.getElementById('kpi-total').textContent = INF_RAW.length + WL_RAW.length + NAD_RAW.length;
+
+  } catch(err){
+    alert('Could not save contact. Please try again.');
+  }
+  btn.textContent = 'Add Contact'; btn.disabled = false;
+}
+
+// ===================== EXPORT CSV =====================
+function exportCSV(type){
+  let data=[], headers=[];
+
+  if(type==='inf' || type==='all'){
+    const infData = INF_RAW.filter(r=>r.Name&&r.Name!=='Influencer / Partner'&&r.Name!=='Contact for us');
+    if(type==='inf'){
+      headers = ['Name','Category','Primary Platform','Reach Tier','Priority Score','NAD Alignment','Device Fit','Access Score','Website','Contact/Booking','Instagram','YouTube','Podcast','Audience Type','Best Partnership','Est Sponsorship Cost','Notes','Pipeline Status','Next Action','Next Action Date','Last Contacted','Last Notes'];
+      data = infData.map(r=>{const rec=getRecord('inf',r.Name);return[r.Name,r.Category,r.Primary_Platform,r.Reach_Tier,r.Priority_Score,r.NAD_Alignment,r.Device_Fit,r.Access_Score,r.Website,r.Contact_Booking,r.Instagram,r.YouTube,r.Podcast,r.Audience_Type,r.Best_Partnership,r.Est_Sponsorship_Cost,r.Practical_Notes,rec.status,r.Next_Action,r.Next_Action_Date,r.Last_Contacted,r.Last_Notes];});
+    }
+  }
+  if(type==='wl'){
+    headers = ['Company','Tier','Headquarters','Monthly Clients','Contact Email','Device Compatibility','Notes','Pipeline Status','Next Action','Next Action Date','Last Contacted','Last Notes'];
+    data = WL_RAW.filter(r=>r.Company&&r.Company!=='Company').map(r=>{const rec=getRecord('wl',r.Company);return[r.Company,r.Tier,r.Headquarters,r.Est_Monthly_Clients,r.Contact_Email,r.Device_Compatibility,r.Notes,rec.status,r.Next_Action,r.Next_Action_Date,r.Last_Contacted,r.Last_Notes];});
+  }
+  if(type==='nad'){
+    headers = ['Company','Tier','Headquarters','NAD Protocol','Location Count','Market Coverage','Monthly Clients','Device Compatibility','Notes','Pipeline Status','Next Action','Next Action Date','Last Contacted','Last Notes'];
+    data = NAD_RAW.filter(r=>r.Company&&r.Company!=='Company').map(r=>{const rec=getRecord('nad',r.Company);return[r.Company,r.Tier,r.Headquarters,r.NAD_Protocol,r.Location_Count,r.Market_Coverage,r.Est_Monthly_Clients,r.Device_Compatibility,r.Notes,rec.status,r.Next_Action,r.Next_Action_Date,r.Last_Contacted,r.Last_Notes];});
+  }
+  if(type==='all'){
+    headers = ['Segment','Name/Company','Tier/Score','Contact','Pipeline Status','Last Note','Next Action','Next Action Date'];
+    const all = [
+      ...INF_RAW.filter(r=>r.Name&&r.Name!=='Influencer / Partner'&&r.Name!=='Contact for us').map(r=>({type:'Influencer',name:r.Name,tier:r.Priority_Score,contact:r.Contact_Booking,typeKey:'inf',raw:r})),
+      ...WL_RAW.filter(r=>r.Company&&r.Company!=='Company').map(r=>({type:'White Label',name:r.Company,tier:r.Tier,contact:r.Contact_Email,typeKey:'wl',raw:r})),
+      ...NAD_RAW.filter(r=>r.Company&&r.Company!=='Company').map(r=>({type:'NAD Dealer',name:r.Company,tier:r.Tier,contact:r.Contact_Email,typeKey:'nad',raw:r}))
+    ];
+    data = all.map(r=>{const rec=getRecord(r.typeKey,r.name);return[r.type,r.name,r.tier,r.contact,rec.status,rec.lastNote||'',r.raw.Next_Action||'',r.raw.Next_Action_Date||''];});
+  }
+
+  const csvContent = [headers, ...data].map(row =>
+    row.map(cell => '"' + String(cell||'').replace(/"/g,'""') + '"').join(',')
+  ).join('
+');
+
+  const blob = new Blob([csvContent], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const labels = {inf:'HNT-Influencers', wl:'HNT-WhiteLabel', nad:'HNT-NADDealers', all:'HNT-AllContacts'};
+  a.download = labels[type] + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===================== DATE RANGE =====================
+let dashDateDays = 7;
+
+function setDateRange(days, btn){
+  dashDateDays = days;
+  document.querySelectorAll('.date-range-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivityLog();
+  renderFunnel();
+}
+
 // ===================== MOBILE =====================
 function toggleSidebar(){
   const s=document.getElementById('sidebar');
@@ -916,6 +1135,95 @@ async function init(){
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-overlay" id="add-contact-modal" onclick="closeAddContact(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('add-contact-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">Add New Contact</div>
+    <div class="modal-sub">New contact will be saved to your Google Sheet</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Contact Type *</label>
+        <select class="form-select" id="ac-type" onchange="updateContactForm()">
+          <option value="Influencer">Influencer</option>
+          <option value="White Label">White Label</option>
+          <option value="NAD Dealer">NAD Dealer</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Name / Company *</label>
+        <input class="form-input" id="ac-name" type="text" placeholder="e.g. Dave Asprey">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Website</label>
+        <input class="form-input" id="ac-website" type="url" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact / Booking</label>
+        <input class="form-input" id="ac-contact" type="text" placeholder="email or URL">
+      </div>
+      <div class="form-group" id="ac-cat-group">
+        <label class="form-label">Category</label>
+        <input class="form-input" id="ac-category" type="text" placeholder="e.g. Physician/Author">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Headquarters / Location</label>
+        <input class="form-input" id="ac-hq" type="text" placeholder="e.g. Austin, TX">
+      </div>
+      <div class="form-group" id="ac-tier-group">
+        <label class="form-label">Tier</label>
+        <select class="form-select" id="ac-tier">
+          <option value="">— Select —</option>
+          <option value="Tier 1">Tier 1</option>
+          <option value="Tier 2">Tier 2</option>
+          <option value="Tier 3">Tier 3</option>
+        </select>
+      </div>
+      <div class="form-group" id="ac-score-group">
+        <label class="form-label">Priority Score (1-10)</label>
+        <input class="form-input" id="ac-score" type="number" min="1" max="10" step="0.1" placeholder="e.g. 8.5">
+      </div>
+      <div class="form-group" id="ac-platform-group">
+        <label class="form-label">Primary Platform</label>
+        <input class="form-input" id="ac-platform" type="text" placeholder="e.g. Podcast, IG">
+      </div>
+      <div class="form-group" id="ac-instagram-group">
+        <label class="form-label">Instagram URL</label>
+        <input class="form-input" id="ac-instagram" type="url" placeholder="https://instagram.com/...">
+      </div>
+      <div class="form-group" id="ac-protocol-group" style="display:none">
+        <label class="form-label">NAD Protocol</label>
+        <input class="form-input" id="ac-protocol" type="text" placeholder="e.g. NAD+ IV therapy">
+      </div>
+      <div class="form-group" id="ac-locations-group" style="display:none">
+        <label class="form-label">Location Count</label>
+        <input class="form-input" id="ac-locations" type="number" placeholder="e.g. 25">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pipeline Status</label>
+        <select class="form-select" id="ac-status">
+          <option value="Prospect">Prospect</option>
+          <option value="Contacted">Contacted</option>
+          <option value="In Discussion">In Discussion</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Active Partner">Active Partner</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Declined">Declined</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="ac-notes" placeholder="Key notes about this contact…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="document.getElementById('add-contact-modal').classList.remove('open')">Cancel</button>
+      <button class="modal-btn-save" onclick="submitAddContact()">Add Contact</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- BOTTOM NAV (mobile only) -->
 <nav class="bottom-nav">
