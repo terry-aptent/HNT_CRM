@@ -9,7 +9,13 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   if (req.method === 'OPTIONS') return res.status(200).end()
-
+// DEBUG - remove after fixing
+return res.status(200).json({
+  hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+  hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+  hasRefreshToken: !!process.env.GOOGLE_REFRESH_TOKEN,
+  clientIdPrefix: process.env.GOOGLE_CLIENT_ID?.substring(0, 10) || 'MISSING',
+})
   try {
     const auth = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
