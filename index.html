@@ -682,10 +682,7 @@ function showError(message) {
 async function loadAndInit() {
   const ok = await loadContactsFromSheet()
   if (ok) {
-    // Call your existing init/render functions here
-    // These should already exist in your index.html script:
-    init()         // or whatever your startup function is called
-    renderDash()   // update dashboard KPIs with live counts
+    init()
   }
 }
 
@@ -1061,6 +1058,7 @@ function init() {
   renderFunnel();
   renderActivityLog();
   updateStats();
+
 }
 
 document.addEventListener('DOMContentLoaded', loadAndInit)
