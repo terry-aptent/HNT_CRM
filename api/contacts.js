@@ -8,6 +8,7 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
+  
   if (req.method === 'OPTIONS') return res.status(200).end()
 // DEBUG - remove after fixing
 return res.status(200).json({
