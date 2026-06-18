@@ -1,0 +1,8 @@
+{
+  "name": "hnt-crm",
+  "version": "1.0.0",
+  "description": "HaloNutraTherapy CRM",
+  "dependencies": {
+    "googleapis": "^140.0.0"
+  }
+}
