@@ -611,7 +611,6 @@ function saveFromPanel(){
   const raw=arr?arr.find(c=>(c.Name||c.Company)===currentDetail.name):null;
   const rowIndex=raw?raw._rowIndex:null;
   saveRecord(currentDetail.type,currentDetail.name,status,note);
-  openDetail(currentDetail.type,currentDetail.name);
   const views={inf:renderInf,wl:renderWL,nad:renderNAD};
   if(views[currentDetail.type])views[currentDetail.type]();
   renderAll();
@@ -621,6 +620,7 @@ function saveFromPanel(){
     if(note&&note.trim()){updates['Last Contact Notes']=note.trim();updates['Last Contacted Date']=today;}
     saveContactUpdate(rowIndex,updates);
   }
+  closeDetailPanel();
 }
 
 function closeDetail(e){if(e.target===document.getElementById('detail-overlay'))closeDetailPanel();}
